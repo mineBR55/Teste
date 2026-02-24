@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
     
-    <!-- Registro da Ficha -->
-    <sheetTemplate
-        name="Ficha de Mob"
-        form="Mob.lfm"
-        script="Mob.lfm.lua"
-        dataType="br.com.mineBR55.mob"
-        description="Ficha simples de monstros DnD 5e"
-        author="mineBR55"
-        version="1.0"
-    />
+    <info>
+        <name>Ficha de Mob</name>
+        <description>Ficha de Monstro</description>
+        <author>mineBR55</author>
+        <version>1.0</version>
+    </info>
+
+    <forms>
+        <form
+            id="br.com.mineBR55.monster"
+            name="frmMonster"
+            file="Mob.lfm"
+            formType="sheetTemplate"
+            title="Ficha de Mob" />
+    </forms>
 
 </plugin>

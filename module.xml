@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module sdkVersion="3.7b">
-    <id>br.com.mineBR55.PedroMobs</id>
+
+    <id>br.com.mineBR55.monster</id>
     <version>1.0</version>
 
     <info lang="pt-BR">
-        <name>Pedro Mobs</name>
-        <description>Ficha simples de monstros para DnD 5e</description>
+        <name>Ficha de Mob</name>
+        <description>Ficha de monstro para DnD 5e</description>
         <author>mineBR55</author>
-        <site>https://github.com/mineBR55/Teste</site>
-        <contact>https://github.com/mineBR55/Teste</contact>
+        <site>https://github.com/mineBR55</site>
+        <contact>minebr55@gmail.com</contact>
     </info>
 
-    <settings>
-        <!-- Automatic translation of strings inside LFM (optional) -->
-        <automaticStringLocalization>false</automaticStringLocalization>
-    </settings>
 </module>
