@@ -1,55 +1,60 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <form name="frmMonster"
+      formType="sheetTemplate"
+      dataType="br.com.mineBR55.mob"
       width="650"
-      height="750"
-      theme="dark">
+      height="750">
 
-  <dataScopeBox />
+    <dataScopeBox/>
 
-  <scrollBox align="client">
+    <scrollBox align="client">
 
-    <label text="MONSTRO" fontSize="18" fontColor="#FFFFFF"/>
+        <label text="MONSTRO" fontSize="18"/>
 
-    <edit field="name"
-          width="500"
-          height="30"
-          transparent="true"/>
+        <edit field="name"
+              width="500"
+              height="30"
+              transparent="true"/>
 
-    <horzLine strokeColor="#666666" strokeSize="2"/>
+        <horzLine strokeColor="#666666"
+                  strokeSize="2"/>
 
-    <label text="DEFESA" fontSize="14" fontColor="#FFAA00"/>
+        <label text="DEFESA"
+               fontSize="14"/>
 
-    <flowLayout orientation="horizontal" height="30">
+        <flowLayout orientation="horizontal"
+                    height="30">
 
-      <label text="AC:" width="40"/>
-      <edit field="ac" width="50" transparent="true"/>
+            <label text="AC:" width="40"/>
+            <edit field="ac" width="50" transparent="true"/>
 
-      <label text="HP:" width="50"/>
-      <edit field="hp" width="60" transparent="true"/>
+            <label text="HP:" width="50"/>
+            <edit field="hp" width="60" transparent="true"/>
 
-      <label text="/" width="20"/>
-      <edit field="hpMax" width="60" transparent="true"/>
+            <label text="/" width="20"/>
+            <edit field="hpMax" width="60" transparent="true"/>
 
-    </flowLayout>
+        </flowLayout>
 
-    <flowLayout orientation="horizontal" height="30">
+        <flowLayout orientation="horizontal"
+                    height="30">
 
-      <edit field="hpInput"
-            width="200"
-            transparent="true"/>
+            <edit field="hpInput"
+                  width="200"
+                  transparent="true"/>
 
-      <button name="btnDamage"
-              text="Dano"
-              width="60"
-              height="25"/>
+            <button name="btnDamage"
+                    text="Dano"
+                    width="60"
+                    height="25"/>
 
-      <button name="btnHeal"
-              text="Cura"
-              width="60"
-              height="25"/>
+            <button name="btnHeal"
+                    text="Cura"
+                    width="60"
+                    height="25"/>
 
-    </flowLayout>
+        </flowLayout>
 
-  </scrollBox>
+    </scrollBox>
 
 </form>

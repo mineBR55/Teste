@@ -11,20 +11,20 @@
     <dataTypes>
         <dataType
             id="br.com.mineBR55.mob"
-            name="Ficha de Monstro"
-            description="Ficha de Monstro DND 5e"
+            name="Ficha de Mob"
+            description="Ficha de Monstro DnD 5e"
             script="Mob.lua"
-            isDefault="true" />
+            isDefault="true"/>
     </dataTypes>
 
     <forms>
         <form
-            id="br.com.mineBR55.mob.form"
+            id="frmMonster"
             dataType="br.com.mineBR55.mob"
             name="frmMonster"
             file="Mob.lfm"
             formType="sheetTemplate"
-            title="Ficha de Monstro" />
+            title="Ficha de Mob"/>
     </forms>
 
 </plugin>
