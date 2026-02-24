@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<plugin name="MonsterSheet"
+        author="mineBR55"
+        version="1.0">
+
+  <dataTypes>
+    <dataType name="Monster"/>
+  </dataTypes>
+
+  <forms>
+    <form name="frmMonster"
+          file="rdkObjs/Mob.lfm.lua"
+          dataType="Monster"/>
+  </forms>
+
+</plugin>
