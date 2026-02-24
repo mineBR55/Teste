@@ -38,6 +38,10 @@ local function constructNew_frmMonster()
     obj.scrollBox1 = GUI.fromHandle(_obj_newObject("scrollBox"));
     obj.scrollBox1:setParent(obj);
     obj.scrollBox1:setAlign("client");
+    obj.scrollBox1:setLeft(10);
+    obj.scrollBox1:setTop(10);
+    obj.scrollBox1:setRight(10);
+    obj.scrollBox1:setBottom(10);
     obj.scrollBox1:setName("scrollBox1");
 
     obj.label1 = GUI.fromHandle(_obj_newObject("label"));
@@ -95,6 +99,7 @@ local function constructNew_frmMonster()
     obj.label4:setText("HP:");
     obj.label4:setWidth(60);
     obj.label4:setFontColor("#FF4444");
+    obj.label4:setLeft(20);
     obj.label4:setName("label4");
 
     obj.edit3 = GUI.fromHandle(_obj_newObject("edit"));
@@ -186,6 +191,7 @@ local function constructNew_frmMonster()
     obj.label8:setText("Bonus:");
     obj.label8:setWidth(60);
     obj.label8:setFontColor("#FFFFFF");
+    obj.label8:setLeft(10);
     obj.label8:setName("label8");
 
     obj.edit7 = GUI.fromHandle(_obj_newObject("edit"));
@@ -200,6 +206,7 @@ local function constructNew_frmMonster()
     obj.label9:setText("Dano:");
     obj.label9:setWidth(50);
     obj.label9:setFontColor("#FFFFFF");
+    obj.label9:setLeft(10);
     obj.label9:setName("label9");
 
     obj.edit8 = GUI.fromHandle(_obj_newObject("edit"));
@@ -215,6 +222,7 @@ local function constructNew_frmMonster()
     obj.btnMulti:setText("Atacar");
     obj.btnMulti:setWidth(60);
     obj.btnMulti:setHeight(25);
+    obj.btnMulti:setLeft(10);
 
     obj.horzLine3 = GUI.fromHandle(_obj_newObject("horzLine"));
     obj.horzLine3:setParent(obj.scrollBox1);
@@ -246,7 +254,7 @@ local function constructNew_frmMonster()
     obj.cmbSaveStat:setParent(obj.flowLayout4);
     obj.cmbSaveStat:setName("cmbSaveStat");
     obj.cmbSaveStat:setField("saveStat");
-    obj.cmbSaveStat:setWidth(80);
+    obj.cmbSaveStat:setWidth(60);
     obj.cmbSaveStat:setHeight(25);
 
     obj.label12 = GUI.fromHandle(_obj_newObject("label"));
@@ -254,6 +262,7 @@ local function constructNew_frmMonster()
     obj.label12:setText("CD:");
     obj.label12:setWidth(40);
     obj.label12:setFontColor("#FFFFFF");
+    obj.label12:setLeft(10);
     obj.label12:setName("label12");
 
     obj.edit9 = GUI.fromHandle(_obj_newObject("edit"));
@@ -268,6 +277,7 @@ local function constructNew_frmMonster()
     obj.label13:setText("Qtd:");
     obj.label13:setWidth(40);
     obj.label13:setFontColor("#FFFFFF");
+    obj.label13:setLeft(10);
     obj.label13:setName("label13");
 
     obj.edit10 = GUI.fromHandle(_obj_newObject("edit"));
@@ -282,6 +292,7 @@ local function constructNew_frmMonster()
     obj.label14:setText("Mod:");
     obj.label14:setWidth(40);
     obj.label14:setFontColor("#FFFFFF");
+    obj.label14:setLeft(10);
     obj.label14:setName("label14");
 
     obj.edit11 = GUI.fromHandle(_obj_newObject("edit"));
@@ -297,6 +308,7 @@ local function constructNew_frmMonster()
     obj.btnSaves:setText("Rolar");
     obj.btnSaves:setWidth(60);
     obj.btnSaves:setHeight(25);
+    obj.btnSaves:setLeft(10);
 
     obj.horzLine4 = GUI.fromHandle(_obj_newObject("horzLine"));
     obj.horzLine4:setParent(obj.scrollBox1);
@@ -352,6 +364,7 @@ local function constructNew_frmMonster()
     obj.btnSpendLegendary:setText("Gastar");
     obj.btnSpendLegendary:setWidth(70);
     obj.btnSpendLegendary:setHeight(25);
+    obj.btnSpendLegendary:setLeft(20);
 
     obj.btnResetLegendary = GUI.fromHandle(_obj_newObject("button"));
     obj.btnResetLegendary:setParent(obj.flowLayout5);

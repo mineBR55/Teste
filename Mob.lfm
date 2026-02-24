@@ -4,207 +4,84 @@
       height="750"
       theme="dark">
 
-  <dataScopeBox/>
+  <dataScopeBox />
 
-  <scrollBox align="client">
+  <scrollBox align="client" left="10" top="10" right="10" bottom="10">
 
-    <label text="MONSTRO"
-           fontSize="18"
-           fontColor="#FFFFFF"/>
+    <label text="MONSTRO" fontSize="18" fontColor="#FFFFFF"/>
+    <edit field="name" width="500" height="30" fontColor="#FFFFFF" transparent="true" hint="Nome"/>
 
-    <edit field="name"
-          width="500"
-          height="30"
-          fontColor="#FFFFFF"
-          transparent="true"
-          hint="Nome"/>
+    <horzLine strokeColor="#666666" strokeSize="2"/>
 
-    <horzLine strokeColor="#666666"
-              strokeSize="2"/>
+    <label text="DEFESA" fontSize="14" fontColor="#FFAA00"/>
 
-    <label text="DEFESA"
-           fontSize="14"
-           fontColor="#FFAA00"/>
+    <flowLayout orientation="horizontal" height="30">
+      <label text="AC:" width="40" fontColor="#FFFFFF"/>
+      <edit field="ac" width="50" transparent="true"/>
 
-    <flowLayout orientation="horizontal"
-                height="30">
+      <label text="HP:" width="60" fontColor="#FF4444" left="20"/>
+      <edit field="hp" width="60" fontColor="#FF4444" transparent="true"/>
 
-      <label text="AC:"
-             width="40"
-             fontColor="#FFFFFF"/>
-
-      <edit field="ac"
-            width="50"
-            transparent="true"/>
-
-      <label text="HP:"
-             width="60"
-             fontColor="#FF4444"/>
-
-      <edit field="hp"
-            width="60"
-            fontColor="#FF4444"
-            transparent="true"/>
-
-      <label text="/"
-             width="20"
-             fontColor="#FFFFFF"/>
-
-      <edit field="hpMax"
-            width="60"
-            fontColor="#AAAAAA"
-            transparent="true"/>
-
+      <label text="/" width="20" fontColor="#FFFFFF"/>
+      <edit field="hpMax" width="60" fontColor="#AAAAAA" transparent="true"/>
     </flowLayout>
 
-    <flowLayout orientation="horizontal"
-                height="30">
-
-      <edit field="hpInput"
-            width="200"
-            transparent="true"
-            hint="Valor dano/cura"/>
-
-      <button name="btnDamage"
-              text="Dano"
-              width="60"
-              height="25"/>
-
-      <button name="btnHeal"
-              text="Cura"
-              width="60"
-              height="25"/>
-
+    <flowLayout orientation="horizontal" height="30">
+      <edit field="hpInput" width="200" transparent="true" hint="Valor dano/cura"/>
+      <button name="btnDamage" text="Dano" width="60" height="25"/>
+      <button name="btnHeal" text="Cura" width="60" height="25"/>
     </flowLayout>
 
-    <horzLine strokeColor="#666666"
-              strokeSize="1"/>
+    <horzLine strokeColor="#666666" strokeSize="1"/>
 
-    <label text="MULTIATTACK"
-           fontSize="14"
-           fontColor="#FFAA00"/>
+    <label text="MULTIATTACK" fontSize="14" fontColor="#FFAA00"/>
 
-    <flowLayout orientation="horizontal"
-                height="30">
+    <flowLayout orientation="horizontal" height="30">
+      <label text="Ataques:" width="70" fontColor="#FFFFFF"/>
+      <edit field="multiCount" width="50" transparent="true"/>
 
-      <label text="Ataques:"
-             width="70"
-             fontColor="#FFFFFF"/>
+      <label text="Bonus:" width="60" fontColor="#FFFFFF" left="10"/>
+      <edit field="multiBonus" width="50" transparent="true"/>
 
-      <edit field="multiCount"
-            width="50"
-            transparent="true"/>
+      <label text="Dano:" width="50" fontColor="#FFFFFF" left="10"/>
+      <edit field="multiDamage" width="100" transparent="true"/>
 
-      <label text="Bonus:"
-             width="60"
-             fontColor="#FFFFFF"/>
-
-      <edit field="multiBonus"
-            width="50"
-            transparent="true"/>
-
-      <label text="Dano:"
-             width="50"
-             fontColor="#FFFFFF"/>
-
-      <edit field="multiDamage"
-            width="100"
-            transparent="true"/>
-
-      <button name="btnMulti"
-              text="Atacar"
-              width="60"
-              height="25"/>
-
+      <button name="btnMulti" text="Atacar" width="60" height="25" left="10"/>
     </flowLayout>
 
-    <horzLine strokeColor="#666666"
-              strokeSize="1"/>
+    <horzLine strokeColor="#666666" strokeSize="1"/>
 
-    <label text="SAVES"
-           fontSize="14"
-           fontColor="#FFAA00"/>
+    <label text="SAVES" fontSize="14" fontColor="#FFAA00"/>
 
-    <flowLayout orientation="horizontal"
-                height="30">
+    <flowLayout orientation="horizontal" height="30">
+      <label text="Atrib:" width="50" fontColor="#FFFFFF"/>
+      <comboBox name="cmbSaveStat" field="saveStat" width="60" height="25"/>
 
-      <label text="Atrib:"
-             width="50"
-             fontColor="#FFFFFF"/>
+      <label text="CD:" width="40" fontColor="#FFFFFF" left="10"/>
+      <edit field="saveDC" width="50" transparent="true"/>
 
-      <comboBox name="cmbSaveStat"
-                field="saveStat"
-                width="80"
-                height="25"/>
+      <label text="Qtd:" width="40" fontColor="#FFFFFF" left="10"/>
+      <edit field="saveCount" width="50" transparent="true"/>
 
-      <label text="CD:"
-             width="40"
-             fontColor="#FFFFFF"/>
+      <label text="Mod:" width="40" fontColor="#FFFFFF" left="10"/>
+      <edit field="saveMod" width="50" transparent="true"/>
 
-      <edit field="saveDC"
-            width="50"
-            transparent="true"/>
-
-      <label text="Qtd:"
-             width="40"
-             fontColor="#FFFFFF"/>
-
-      <edit field="saveCount"
-            width="50"
-            transparent="true"/>
-
-      <label text="Mod:"
-             width="40"
-             fontColor="#FFFFFF"/>
-
-      <edit field="saveMod"
-            width="50"
-            transparent="true"/>
-
-      <button name="btnSaves"
-              text="Rolar"
-              width="60"
-              height="25"/>
-
+      <button name="btnSaves" text="Rolar" width="60" height="25" left="10"/>
     </flowLayout>
 
-    <horzLine strokeColor="#666666"
-              strokeSize="1"/>
+    <horzLine strokeColor="#666666" strokeSize="1"/>
 
-    <label text="ACOES LENDARIAS"
-           fontSize="14"
-           fontColor="#FF6666"/>
+    <label text="ACOES LENDARIAS" fontSize="14" fontColor="#FF6666"/>
 
-    <flowLayout orientation="horizontal"
-                height="30">
+    <flowLayout orientation="horizontal" height="30">
+      <label text="Atual:" width="60" fontColor="#FFFFFF"/>
+      <edit field="legendaryCurrent" width="50" transparent="true"/>
 
-      <label text="Atual:"
-             width="60"
-             fontColor="#FFFFFF"/>
+      <label text="/" width="20" fontColor="#FFFFFF"/>
+      <edit field="legendaryMax" width="50" fontColor="#AAAAAA" transparent="true"/>
 
-      <edit field="legendaryCurrent"
-            width="50"
-            transparent="true"/>
-
-      <label text="/"
-             width="20"
-             fontColor="#FFFFFF"/>
-
-      <edit field="legendaryMax"
-            width="50"
-            fontColor="#AAAAAA"
-            transparent="true"/>
-
-      <button name="btnSpendLegendary"
-              text="Gastar"
-              width="70"
-              height="25"/>
-
-      <button name="btnResetLegendary"
-              text="Reset"
-              width="70"
-              height="25"/>
-
+      <button name="btnSpendLegendary" text="Gastar" width="70" height="25" left="20"/>
+      <button name="btnResetLegendary" text="Reset" width="70" height="25"/>
     </flowLayout>
 
   </scrollBox>
