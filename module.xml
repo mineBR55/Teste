@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module sdkVersion="3.7b">
-    <!--The "id" identifies your plugin globally. Must be unique, must contain only alphanumeric characters, underlines and dots and must contain at least 5 characters and a maximum of 40. Once set the ID, you should not change it ;)-->
-    <id>com.pedromobs</id>
-    <!--"version" is the version of your plugin. When you release a new version of your module, change here =)-->
+    <id>br.com.mineBR55.PedroMobs</id>
     <version>1.0</version>
+
     <info lang="pt-BR">
-        <!--Plugin information in "pt-BR" language. You can have multiple "info" tags, one for each translation you want.-->
-        <name>PedroMobs</name>
-        <description>Descrição do plugin aqui. Exemplo: Adiciona suporte a abas para o sistema ETC, com tais funcionalidades, para tais propósitos ...</description>
-        <author>Pedro</author>
-       <!-- <site>http://www.yourwebsite.com</site>-->
-        <!--<contact>Facebook? Twitter? E-Mail?</contact>-->
+        <name>Pedro Mobs</name>
+        <description>Ficha simples de monstros para DnD 5e</description>
+        <author>mineBR55</author>
+        <site>https://github.com/mineBR55/Teste</site>
+        <contact>https://github.com/mineBR55/Teste</contact>
     </info>
+
+    <settings>
+        <!-- Automatic translation of strings inside LFM (optional) -->
+        <automaticStringLocalization>false</automaticStringLocalization>
+    </settings>
 </module>
