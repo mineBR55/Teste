@@ -3,19 +3,28 @@
 
     <info>
         <name>Teste de Mob</name>
-        <description>Ficha de Monstro DnD 5e</description>
+        <description>Ficha de Monstro</description>
         <author>mineBR55</author>
         <version>1.0</version>
     </info>
 
+    <dataTypes>
+        <dataType
+            id="br.com.mineBR55.mob"
+            name="Ficha de Monstro"
+            description="Ficha de Monstro DND 5e"
+            script="Mob.lua"
+            isDefault="true" />
+    </dataTypes>
+
     <forms>
         <form
-            id="br.com.mineBR55.monster"
+            id="br.com.mineBR55.mob.form"
+            dataType="br.com.mineBR55.mob"
             name="frmMonster"
             file="Mob.lfm"
             formType="sheetTemplate"
-            title="Ficha de Mob"
-            dataType="br.com.mineBR55.monster" />
+            title="Ficha de Monstro" />
     </forms>
 
 </plugin>
