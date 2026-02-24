@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module sdkVersion="3.7b">
 
-    <id>br.com.mineBR55.monster</id>
+    <id>br.com.mineBR55.Teste</id>
     <version>1.0</version>
 
     <info lang="pt-BR">
-        <name>Ficha de Mob</name>
-        <description>Ficha de monstro para DnD 5e</description>
+        <name>Teste de Mob</name>
+        <description>Plugin de ficha de monstro para DnD 5e</description>
         <author>mineBR55</author>
         <site>https://github.com/mineBR55</site>
         <contact>minebr55@gmail.com</contact>

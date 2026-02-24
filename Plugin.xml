@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
-    
+
     <info>
-        <name>Ficha de Mob</name>
-        <description>Ficha de Monstro</description>
+        <name>Teste de Mob</name>
+        <description>Ficha de Monstro DnD 5e</description>
         <author>mineBR55</author>
         <version>1.0</version>
     </info>
@@ -14,7 +14,8 @@
             name="frmMonster"
             file="Mob.lfm"
             formType="sheetTemplate"
-            title="Ficha de Mob" />
+            title="Ficha de Mob"
+            dataType="br.com.mineBR55.monster" />
     </forms>
 
 </plugin>
