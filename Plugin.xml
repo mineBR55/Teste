@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin name="Teste" version="1.0" author="SeuNome">
-    <description>Ficha de monstros D&D 5e</description>
+    <description>Ficha de monstros DND 5e</description>
     <components>
         <form path="output/Mob.lfm" lua="output/Mob.lua"/>
     </components>
