@@ -4,45 +4,65 @@ require("rrpgGUI.lua");
 require("rrpgDialogs.lua");
 require("ndb.lua");
 
+local function rollDice(expr, label, sheet)
+    local mesa = nil
+    if sheet ~= nil then
+        mesa = Firecast.getMesaDe(sheet)
+    end
+
+    if mesa ~= nil then
+        Firecast.interpretarRolagem(mesa, expr, label)
+    else
+        Dialogs.showMessage("Não foi possível rolar os dados.")
+    end
+end
+
 local function newFrmAction()
-    local self = GUI.fromHandle(_obj_newObject("form"));
-    self:setName("frmAction");
+    local obj = GUI.fromHandle(_obj_newObject("form"));
+    obj:setName("frmAction");
 
-    function self:setNodeObject(nodeObject)
-        self.sheet = nodeObject;
+    function obj:setNodeObject(nodeObject)
+        rawset(obj, "sheet", nodeObject);
     end
 
-    function self:getNodeObject()
-        return self.sheet;
+    function obj:getNodeObject()
+        return rawget(obj, "sheet");
     end
 
-    -- Botão de rolar ataque
-    self._e_event0 = self:addEventListener("onClick",
+    obj._e0 = obj:addEventListener("onClick",
         function(event)
-            if event.source.name == "btnRoll" then
-                if self.sheet ~= nil then
-                    local mesa = Firecast.getMesaDe(self.sheet);
-                    local rolagem = (self.sheet.bonus or "0") .. " + " .. (self.sheet.dano or "0");
+            if event.source and event.source.name == "btnRoll" then
+                local sheet = obj.sheet
+                if sheet == nil then return end
 
-                    if mesa ~= nil then
-                        mesa.chat:rolarDados(rolagem, self.sheet.nome or "Ataque");
-                    end
-                end
+                local attackType = sheet.tipoRolagem or "1d20"
+                local bonus      = sheet.bonus or "0"
+                local dano       = sheet.dano or "1d6"
+
+                -- Rolagem de ataque
+                rollDice(attackType .. "+" .. bonus,
+                         "Ataque: " .. (sheet.nome or "Ação"),
+                         sheet)
+
+                -- Rolagem de dano
+                rollDice(dano,
+                         "Dano: " .. (sheet.nome or "Ação"),
+                         sheet)
             end
         end);
 
-    return self;
+    return obj;
 end
 
 local _frmAction = {
     newEditor = newFrmAction,
-    new = newFrmAction,
-    name = "frmAction",
-    dataType = "",
-    formType = "undefined",
+    new       = newFrmAction,
+    name      = "frmAction",
+    dataType  = "",
+    formType  = "undefined",
     formComponentName = "form"
-};
+}
 
-Firecast.registrarForm(_frmAction);
+Firecast.registrarForm(_frmAction)
 
-return _frmAction;
+return _frmAction
