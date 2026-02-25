@@ -5,202 +5,81 @@ require("rrpgDialogs.lua");
 require("rrpgLFM.lua");
 require("ndb.lua");
 
-local constructNew_frmMonster = function()
+local frmMonster = {};
+frmMonster.__index = frmMonster;
 
-    local obj = GUI.fromHandle(_obj_newObject("form"));
-    local self = obj;
+function frmMonster.new()
+    local self = GUI.fromHandle(_obj_newObject("form"));
+    setmetatable(self, frmMonster);
+
+    self:setName("frmMonster");
+
     local sheet = nil;
 
-    obj:setName("frmMonster");
-    obj:setFormType("sheetTemplate");
-    obj:setDataType("frmMonster");
-    obj:setTitle("Ficha de Mob");
-
-    ---------------------------------------------------
-    -- VINCULO COM NODE
-    ---------------------------------------------------
-
-    function obj:setNodeObject(nodeObject)
+    function self:setNodeObject(nodeObject)
         sheet = nodeObject;
         self.sheet = nodeObject;
-    end;
-
-    ---------------------------------------------------
-    -- UTIL
-    ---------------------------------------------------
-
-    local function getMesa()
-        if sheet ~= nil then
-            return Firecast.getMesaDe(sheet);
-        end
-        return nil;
     end
 
-    local function enviarMensagem(msg)
-        local mesa = getMesa();
-        if mesa ~= nil then
-            mesa:enviarMensagem(msg);
-        end
+    function self:_releaseEvents()
+        if self._e0 then __o_rrpgObjs.removeEventListenerById(self._e0); end
+        if self._e1 then __o_rrpgObjs.removeEventListenerById(self._e1); end
     end
 
-    local function rolar(expr, label)
-        local mesa = getMesa();
-        if mesa ~= nil then
-            Firecast.interpretarRolagem(mesa, expr, label);
-        end
+    function self:destroy()
+        self:_releaseEvents();
     end
 
-    ---------------------------------------------------
-    -- EVENTOS (APÓS LFM CARREGAR)
-    ---------------------------------------------------
+    return self;
+end
+
+function constructNew_frmMonster()
+    local obj = frmMonster.new();
+
+    obj:setFormType("sheetTemplate");
+    obj:setDataType("br.com.mineBR55.mob");
+    obj:setTitle("Ficha de Mob");
 
     obj._e0 = obj.btnDamage:addEventListener("onClick",
         function()
-            if sheet == nil then return end
-
-            local current = tonumber(sheet.hp) or 0
-            local dmg = tonumber(sheet.hpInput) or 0
-
-            current = current - dmg
-            if current < 0 then current = 0 end
-
-            sheet.hp = current
-            sheet.hpInput = ""
-
-            enviarMensagem((sheet.name or "Monstro") ..
-                " sofreu " .. dmg ..
-                " de dano. HP: " .. current ..
-                "/" .. (sheet.hpMax or "?"))
-        end);
+            if obj.sheet ~= nil then
+                local hp = tonumber(obj.sheet.hp) or 0;
+                local dmg = tonumber(obj.sheet.hpInput) or 0;
+                hp = hp - dmg;
+                if hp < 0 then hp = 0; end
+                obj.sheet.hp = hp;
+                obj.sheet.hpInput = "";
+            end
+        end
+    );
 
     obj._e1 = obj.btnHeal:addEventListener("onClick",
         function()
-            if sheet == nil then return end
-
-            local current = tonumber(sheet.hp) or 0
-            local max = tonumber(sheet.hpMax) or current
-            local heal = tonumber(sheet.hpInput) or 0
-
-            current = current + heal
-            if current > max then current = max end
-
-            sheet.hp = current
-            sheet.hpInput = ""
-
-            enviarMensagem((sheet.name or "Monstro") ..
-                " curou " .. heal ..
-                " HP. HP: " .. current ..
-                "/" .. max)
-        end);
-
-    obj._e2 = obj.btnMulti:addEventListener("onClick",
-        function()
-            if sheet == nil then return end
-
-            local count = tonumber(sheet.multiCount) or 1
-            local bonus = tonumber(sheet.multiBonus) or 0
-            local damage = sheet.multiDamage or "1d6"
-
-            enviarMensagem((sheet.name or "Monstro") .. " realiza Multiattack!")
-
-            for i = 1, count do
-                rolar("1d20 + " .. bonus,
-                    (sheet.name or "Monstro") .. " - Ataque " .. i)
-
-                rolar(damage,
-                    (sheet.name or "Monstro") .. " - Dano " .. i)
+            if obj.sheet ~= nil then
+                local hp = tonumber(obj.sheet.hp) or 0;
+                local heal = tonumber(obj.sheet.hpInput) or 0;
+                hp = hp + heal;
+                obj.sheet.hp = hp;
+                obj.sheet.hpInput = "";
             end
-        end);
-
-    obj._e3 = obj.btnSaves:addEventListener("onClick",
-        function()
-            if sheet == nil then return end
-
-            local count = tonumber(sheet.saveCount) or 1
-            local dc = tonumber(sheet.saveDC) or 10
-            local mod = tonumber(sheet.saveMod) or 0
-            local stat = sheet.saveStat or "DEX"
-
-            enviarMensagem((sheet.name or "Monstro") ..
-                " força teste de " .. stat ..
-                " CD " .. dc)
-
-            for i = 1, count do
-                rolar("1d20 + " .. mod,
-                    "Save " .. i)
-            end
-        end);
-
-    obj._e4 = obj.btnSpendLegendary:addEventListener("onClick",
-        function()
-            if sheet == nil then return end
-
-            local current = tonumber(sheet.legendaryCurrent) or 0
-
-            if current > 0 then
-                current = current - 1
-                sheet.legendaryCurrent = current
-
-                enviarMensagem((sheet.name or "Monstro") ..
-                    " gastou 1 Ação Lendária. Restam: " .. current)
-            else
-                enviarMensagem((sheet.name or "Monstro") ..
-                    " não tem ações lendárias restantes!")
-            end
-        end);
-
-    obj._e5 = obj.btnResetLegendary:addEventListener("onClick",
-        function()
-            if sheet == nil then return end
-
-            local max = tonumber(sheet.legendaryMax) or 0
-            sheet.legendaryCurrent = max
-
-            enviarMensagem((sheet.name or "Monstro") ..
-                " restaurou ações lendárias: " .. max)
-        end);
-
-    ---------------------------------------------------
-    -- DESTROY
-    ---------------------------------------------------
-
-    function obj:_releaseEvents()
-        __o_rrpgObjs.removeEventListenerById(self._e0);
-        __o_rrpgObjs.removeEventListenerById(self._e1);
-        __o_rrpgObjs.removeEventListenerById(self._e2);
-        __o_rrpgObjs.removeEventListenerById(self._e3);
-        __o_rrpgObjs.removeEventListenerById(self._e4);
-        __o_rrpgObjs.removeEventListenerById(self._e5);
-    end
-
-    obj._oldDestroy = obj.destroy;
-
-    function obj:destroy()
-        self:_releaseEvents();
-
-        if self._oldDestroy then
-            self:_oldDestroy();
         end
-    end;
+    );
 
     return obj;
-end;
+end
 
----------------------------------------------------
--- REGISTRO
----------------------------------------------------
+function newfrmMonster()
+    local retObj = constructNew_frmMonster();
+    return retObj;
+end
 
 local _frmMonster = {
-    newEditor = constructNew_frmMonster,
-    new = constructNew_frmMonster,
+    newEditor = newfrmMonster,
+    new = newfrmMonster,
     name = "frmMonster",
-    dataType = "frmMonster",
     formType = "sheetTemplate",
-    formComponentName = "form",
-    title = "Ficha de Mob",
-    description = "Ficha simples para monstros"
+    dataType = "br.com.mineBR55.mob",
+    title = "Ficha de Mob"
 };
-
-Firecast.registrarForm(_frmMonster);
 
 return _frmMonster;

@@ -1,57 +1,74 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<form name="frmMonster"
-      formType="sheetTemplate"
-      dataType="br.com.mineBR55.mob"
-      width="650"
-      height="750">
+<form
+    name="frmMonster"
+    formType="sheetTemplate"
+    dataType="br.com.mineBR55.mob"
+    width="650"
+    height="750">
 
     <dataScopeBox/>
 
-    <scrollBox align="client">
+    <scrollBox
+        name="scrollBox1"
+        align="client">
 
-        <label text="MONSTRO" fontSize="18"/>
+        <!-- TÍTULO -->
+        <label
+            align="top"
+            height="30"
+            text="MONSTRO"
+            fontSize="18"/>
 
-        <edit field="name"
-              width="500"
-              height="30"
-              transparent="true"/>
+        <edit
+            align="top"
+            height="30"
+            field="name"/>
 
-        <horzLine strokeColor="#666666"
-                  strokeSize="2"/>
+        <horzLine
+            align="top"
+            height="5"/>
 
-        <label text="DEFESA"
-               fontSize="14"/>
+        <!-- DEFESA -->
+        <label
+            align="top"
+            height="25"
+            text="DEFESA"
+            fontSize="14"/>
 
-        <flowLayout orientation="horizontal"
-                    height="30">
+        <flowLayout
+            align="top"
+            height="35">
 
             <label text="AC:" width="40"/>
-            <edit field="ac" width="50" transparent="true"/>
+            <edit field="ac" width="60"/>
 
-            <label text="HP:" width="50"/>
-            <edit field="hp" width="60" transparent="true"/>
+            <label text="HP:" width="40"/>
+            <edit field="hp" width="60"/>
 
             <label text="/" width="20"/>
-            <edit field="hpMax" width="60" transparent="true"/>
+            <edit field="hpMax" width="60"/>
 
         </flowLayout>
 
-        <flowLayout orientation="horizontal"
-                    height="30">
+        <flowLayout
+            align="top"
+            height="35">
 
-            <edit field="hpInput"
-                  width="200"
-                  transparent="true"/>
+            <edit
+                field="hpInput"
+                width="150"/>
 
-            <button name="btnDamage"
-                    text="Dano"
-                    width="60"
-                    height="25"/>
+            <button
+                name="btnDamage"
+                text="Dano"
+                width="60"
+                height="25"/>
 
-            <button name="btnHeal"
-                    text="Cura"
-                    width="60"
-                    height="25"/>
+            <button
+                name="btnHeal"
+                text="Cura"
+                width="60"
+                height="25"/>
 
         </flowLayout>
 
