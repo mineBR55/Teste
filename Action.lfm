@@ -1,27 +1,23 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<form name="frmAction">
+<form
+    name="frmAction"
+    formType="undefined"
+    dataType="br.com.mineBR55.mob.action"
+    height="120">
 
     <dataScopeBox/>
 
-    <rectangle align="top" height="120">
+    <rectangle align="client" color="#333333">
 
-        <edit align="top" height="25"
-              field="nome"
-              hint="Nome da Ação"/>
+        <edit field="nome" align="top" height="25"/>
 
-        <edit align="top" height="25"
-              field="bonus"
-              hint="Bonus de Ataque"/>
+        <flowLayout align="top" height="30">
+            <edit field="dado" width="60"/>
+            <edit field="mod" width="60"/>
+            <button name="btnRolar" text="Rolar" width="60"/>
+        </flowLayout>
 
-        <edit align="top" height="25"
-              field="dano"
-              hint="Dano (ex: 2d6+3)"/>
-
-        <button
-            align="top"
-            height="25"
-            text="Rolar"
-            name="btnRoll"/>
+        <textEditor field="descricao" align="client"/>
 
     </rectangle>
 

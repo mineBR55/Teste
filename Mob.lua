@@ -1,4 +1,5 @@
 require("firecast.lua");
+local __o_rrpgObjs = require("rrpgObjs.lua");
 
 local frmMonster = {};
 
@@ -10,35 +11,26 @@ function frmMonster.new()
 
     function obj:setNodeObject(nodeObject)
         sheet = nodeObject;
-        obj.sheet = nodeObject;
-    end;
-
-    obj._oldLFMDestroy = obj.destroy;
-
-    function obj:destroy()
-        if self._oldLFMDestroy then
-            self:_oldLFMDestroy();
-        end;
-    end;
+        self.sheet = nodeObject;
+    end
 
     return obj;
-end;
+end
 
 local _frmMonster = {
     newEditor = function()
         return frmMonster.new();
     end,
+
     new = function()
         return frmMonster.new();
     end,
+
     name = "frmMonster",
     formType = "sheetTemplate",
     dataType = "br.com.mineBR55.mob",
-    formComponentName = "form",
     title = "Ficha de Mob",
-    description = "Ficha simples de monstro"
+    description = "Ficha de Monstro"
 };
-
-Firecast.registrarForm(_frmMonster);
 
 return _frmMonster;

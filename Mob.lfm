@@ -3,108 +3,117 @@
     name="frmMonster"
     formType="sheetTemplate"
     dataType="br.com.mineBR55.mob"
-    title="Ficha de Mob"
     width="900"
-    height="950">
+    height="700">
 
-    <dataScopeBox />
+    <dataScopeBox/>
 
     <scrollBox align="client">
 
-        <!-- TÍTULO -->
-        <label text="MONSTRO"
-               fontSize="20" />
+        <!-- HEADER -->
+        <rectangle align="top" height="100" color="#2b2b2b">
 
-        <edit field="name"
-              width="500"
-              height="30"
-              transparent="true" />
+            <layout align="left" width="500">
+                <label
+                    text="Nome do Monstro"
+                    align="top"
+                    fontSize="12"/>
 
-        <horzLine strokeColor="#666666"
-                  strokeSize="2" />
+                <edit
+                    field="name"
+                    align="top"
+                    height="35"
+                    fontSize="20"/>
+            </layout>
 
-        <!-- DEFESA -->
-        <label text="DEFESA"
-               fontSize="16" />
+            <layout align="right" width="250">
 
-        <flowLayout orientation="horizontal"
-                    height="35">
+                <label text="Classe de Armadura" align="top"/>
+                <edit field="ac" align="top" height="30"/>
 
-            <label text="AC:" width="40"/>
-            <edit field="ac"
-                  width="50"
-                  transparent="true"/>
+                <label text="Pontos de Vida" align="top"/>
+                <flowLayout align="top" height="30">
+                    <edit field="hp" width="60"/>
+                    <label text="/" width="20"/>
+                    <edit field="hpMax" width="60"/>
+                </flowLayout>
 
-            <label text="HP:" width="40"/>
-            <edit field="hp"
-                  width="60"
-                  transparent="true"/>
+            </layout>
 
-            <label text="/" width="20"/>
-            <edit field="hpMax"
-                  width="60"
-                  transparent="true"/>
-
-        </flowLayout>
-
-        <flowLayout orientation="horizontal"
-                    height="35">
-
-            <edit field="hpInput"
-                  width="200"
-                  transparent="true"/>
-
-            <button name="btnDamage"
-                    text="Dano"
-                    width="70"
-                    height="25"/>
-
-            <button name="btnHeal"
-                    text="Cura"
-                    width="70"
-                    height="25"/>
-
-        </flowLayout>
-
-        <horzLine strokeColor="#666666"
-                  strokeSize="2" />
+        </rectangle>
 
         <!-- ATRIBUTOS -->
-        <label text="ATRIBUTOS"
-               fontSize="16" />
+        <rectangle align="top" height="120" color="#1f1f1f">
 
-        <flowLayout orientation="horizontal"
-                    height="35">
+            <label
+                text="ATRIBUTOS"
+                align="top"
+                fontSize="14"/>
 
-            <label text="FOR:" width="40"/>
-            <edit field="str" width="50" transparent="true"/>
+            <flowLayout align="top" height="80">
 
-            <label text="DES:" width="40"/>
-            <edit field="dex" width="50" transparent="true"/>
+                <layout width="80">
+                    <label text="FOR"/>
+                    <edit field="str"/>
+                </layout>
 
-            <label text="CON:" width="40"/>
-            <edit field="con" width="50" transparent="true"/>
+                <layout width="80">
+                    <label text="DES"/>
+                    <edit field="dex"/>
+                </layout>
 
-            <label text="INT:" width="40"/>
-            <edit field="int" width="50" transparent="true"/>
+                <layout width="80">
+                    <label text="CON"/>
+                    <edit field="con"/>
+                </layout>
 
-            <label text="SAB:" width="40"/>
-            <edit field="wis" width="50" transparent="true"/>
+                <layout width="80">
+                    <label text="INT"/>
+                    <edit field="int"/>
+                </layout>
 
-            <label text="CAR:" width="40"/>
-            <edit field="cha" width="50" transparent="true"/>
+                <layout width="80">
+                    <label text="SAB"/>
+                    <edit field="wis"/>
+                </layout>
 
-        </flowLayout>
+                <layout width="80">
+                    <label text="CAR"/>
+                    <edit field="cha"/>
+                </layout>
 
-        <horzLine strokeColor="#666666"
-                  strokeSize="2" />
+            </flowLayout>
+
+        </rectangle>
 
         <!-- DESCRIÇÃO -->
-        <label text="DESCRIÇÃO"
-               fontSize="16" />
+        <rectangle align="top" height="200" color="#2b2b2b">
 
-        <textEditor field="description"
-                    height="200" />
+            <label
+                text="DESCRIÇÃO"
+                align="top"
+                fontSize="14"/>
+
+            <textEditor
+                field="description"
+                align="client"/>
+
+        </rectangle>
+
+        <!-- AÇÕES -->
+        <rectangle align="top" height="250" color="#1f1f1f">
+
+            <label
+                text="AÇÕES"
+                align="top"
+                fontSize="14"/>
+
+            <recordList
+                field="actions"
+                align="client"
+                templateForm="frmAction"/>
+
+        </rectangle>
 
     </scrollBox>
 

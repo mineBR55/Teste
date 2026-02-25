@@ -1,20 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<plugin>
+<forms>
 
-    <info>
-        <name>Teste de Mob</name>
-        <description>Ficha de Monstro</description>
-        <author>mineBR55</author>
-        <version>1.0</version>
-    </info>
+    <form
+        id="br.com.mineBR55.mob"
+        name="frmMonster"
+        file="Mob.lfm"
+        formType="sheetTemplate"
+        title="Ficha de Mob"/>
 
-    <forms>
-        <form
-            id="br.com.mineBR55.mob"
-            name="frmMonster"
-            file="Mob.lfm"
-            formType="sheetTemplate"
-            title="Ficha de Mob"/>
-    </forms>
+    <form
+        id="br.com.mineBR55.mob.action"
+        name="frmAction"
+        file="Action.lfm"/>
 
-</plugin>
+</forms>
