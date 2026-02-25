@@ -1,49 +1,42 @@
 require("firecast.lua");
-require("rrpgObjs.lua");
-require("rrpgGUI.lua");
-require("rrpgDialogs.lua");
-require("ndb.lua");
 
-local function newFrmMonster()
-    local self = GUI.fromHandle(_obj_newObject("form"));
-    self:setName("frmMonster");
+local frmMonster = {};
 
-    function self:setNodeObject(nodeObject)
-        self.sheet = nodeObject;
-    end
+function frmMonster.new()
+    local obj = GUI.fromHandle(_obj_newObject("form"));
+    obj:setName("frmMonster");
 
-    function self:getNodeObject()
-        return self.sheet;
-    end
+    local sheet = nil;
 
-    local function calcMod(valor)
-        valor = tonumber(valor) or 10
-        return math.floor((valor - 10) / 2)
-    end
+    function obj:setNodeObject(nodeObject)
+        sheet = nodeObject;
+        obj.sheet = nodeObject;
+    end;
 
-    self._e_event0 = self:addEventListener("onNodeReady",
-        function()
-            if self.sheet ~= nil then
-                self.sheet.mod_forca = calcMod(self.sheet.forca)
-                self.sheet.mod_destreza = calcMod(self.sheet.destreza)
-                self.sheet.mod_constituicao = calcMod(self.sheet.constituicao)
-                self.sheet.mod_inteligencia = calcMod(self.sheet.inteligencia)
-                self.sheet.mod_sabedoria = calcMod(self.sheet.sabedoria)
-                self.sheet.mod_carisma = calcMod(self.sheet.carisma)
-            end
-        end);
+    obj._oldLFMDestroy = obj.destroy;
 
-    return self;
-end
+    function obj:destroy()
+        if self._oldLFMDestroy then
+            self:_oldLFMDestroy();
+        end;
+    end;
+
+    return obj;
+end;
 
 local _frmMonster = {
-    newEditor = newFrmMonster,
-    new = newFrmMonster,
+    newEditor = function()
+        return frmMonster.new();
+    end,
+    new = function()
+        return frmMonster.new();
+    end,
     name = "frmMonster",
-    dataType = "br.com.mineBR55.mob",
     formType = "sheetTemplate",
+    dataType = "br.com.mineBR55.mob",
     formComponentName = "form",
-    title = "Ficha de Mob"
+    title = "Ficha de Mob",
+    description = "Ficha simples de monstro"
 };
 
 Firecast.registrarForm(_frmMonster);
