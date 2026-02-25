@@ -1,42 +1,60 @@
-require("firecast.lua");
+require("firecast.lua")
+local GUI = require("gui.lua")
 
-local frmAction = {};
+local function constructNew_frmAction()
+    local obj = GUI.fromHandle(_obj_newObject("form"))
+    obj:setName("frmAction")
 
-function frmAction.new()
-    local obj = GUI.fromHandle(_obj_newObject("form"));
-    obj:setName("frmAction");
+    local sheet = nil
 
-    local sheet = nil;
-
-    function obj:setNodeObject(nodeObject)
-        sheet = nodeObject;
-        obj.sheet = nodeObject;
+    obj.setNodeObject = function(self, nodeObject)
+        sheet = nodeObject
+        self.sheet = nodeObject
     end
 
-    obj._e0 = obj.btnRolar:addEventListener("onClick",
-        function()
-            if sheet ~= nil then
-                local exp = (sheet.dado or "1d20") .. "+" .. (sheet.mod or "0")
-                Firecast.interpretarRolagem(
-                    Firecast.getMesaDe(sheet),
-                    exp,
-                    sheet.nome or "Ação"
-                );
-            end
-        end);
+    _gui_assignInitialParentForForm(obj.handle)
 
-    return obj;
+    -------------------------------------------------
+    -- BOTÃO ROLAR
+    -------------------------------------------------
+    local btnRolar = GUI.fromHandle(_obj_newObject("button"))
+    btnRolar:setParent(obj)
+    btnRolar:setText("Rolar")
+    btnRolar:setAlign("right")
+    btnRolar:setWidth(80)
+
+    btnRolar.onClick = function()
+        if sheet ~= nil then
+            local mesa = Firecast.getMesaDe(sheet)
+            if mesa ~= nil then
+                local bonus = tonumber(sheet.bonusAtaque) or 0
+                mesa.chat:rolarDados("1d20+" .. bonus,
+                    sheet.nomeAcao or "Ataque")
+            end
+        end
+    end
+
+    obj.destroy = function(self)
+        if btnRolar ~= nil then
+            btnRolar:destroy()
+            btnRolar = nil
+        end
+
+        if self.handle ~= 0 then
+            _obj_deleteObject(self.handle)
+        end
+    end
+
+    return obj
 end
 
 local _frmAction = {
-    newEditor = function() return frmAction.new() end,
-    new       = function() return frmAction.new() end,
-    name      = "frmAction",
-    dataType  = "br.com.mineBR55.mob.action",
-    formType  = "undefined",
+    newEditor = constructNew_frmAction,
+    new = constructNew_frmAction,
+    name = "frmAction",
     formComponentName = "form"
-};
+}
 
-Firecast.registrarForm(_frmAction);
+Firecast.registrarForm(_frmAction)
 
-return _frmAction;
+return _frmAction

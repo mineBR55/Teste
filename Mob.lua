@@ -1,105 +1,72 @@
-require("firecast.lua");
-require("rrpgObjs.lua");
-require("rrpgGUI.lua");
-require("rrpgDialogs.lua");
-require("rrpgLFM.lua");
-require("ndb.lua");
+require("firecast.lua")
+local GUI = require("gui.lua")
 
-local __o_rrpgObjs = require("rrpgObjs.lua");
+local function constructNew_frmMob()
+    local obj = GUI.fromHandle(_obj_newObject("form"))
+    obj:setName("frmMob")
 
-local frmMonster = {};
+    local sheet = nil
 
-function frmMonster.new()
-    local obj = GUI.fromHandle(_obj_newObject("form"));
-    obj:setName("frmMonster");
-
-    local sheet = nil;
-
-    -------------------------------------
-    -- VINCULAR NODO
-    -------------------------------------
-    function obj:setNodeObject(nodeObject)
-        sheet = nodeObject;
-        self.sheet = nodeObject;
+    -- CORRETO: usa ponto, não dois pontos
+    obj.setNodeObject = function(self, nodeObject)
+        sheet = nodeObject
+        self.sheet = nodeObject
     end
 
-    -------------------------------------
-    -- HP SYSTEM
-    -------------------------------------
-    local function applyDamage()
-        if sheet == nil then return end
+    _gui_assignInitialParentForForm(obj.handle)
 
-        local current = tonumber(sheet.hp) or 0
-        local dmg = tonumber(sheet.hpInput) or 0
-
-        current = current - dmg
-        if current < 0 then current = 0 end
-
-        sheet.hp = current
-        sheet.hpInput = ""
+    ---------------------------------------------------
+    -- FUNÇÃO DE CÁLCULO DE MODIFICADOR
+    ---------------------------------------------------
+    local function calcularMod(valor)
+        valor = tonumber(valor) or 0
+        return math.floor((valor - 10) / 2)
     end
 
-    local function applyHeal()
-        if sheet == nil then return end
+    ---------------------------------------------------
+    -- DATALINK ATRIBUTOS
+    ---------------------------------------------------
+    local dataLinkAtributos = GUI.fromHandle(_obj_newObject("dataLink"))
+    dataLinkAtributos:setParent(obj)
+    dataLinkAtributos:setFields({
+        "forca","destreza","constituicao",
+        "inteligencia","sabedoria","carisma"
+    })
 
-        local current = tonumber(sheet.hp) or 0
-        local max = tonumber(sheet.hpMax) or 0
-        local heal = tonumber(sheet.hpInput) or 0
-
-        current = current + heal
-        if current > max then current = max end
-
-        sheet.hp = current
-        sheet.hpInput = ""
-    end
-
-    -------------------------------------
-    -- EVENTOS
-    -------------------------------------
-    obj._e0 = obj.btnDamage:addEventListener("onClick",
-        function()
-            applyDamage()
-        end);
-
-    obj._e1 = obj.btnHeal:addEventListener("onClick",
-        function()
-            applyHeal()
-        end);
-
-    -------------------------------------
-    -- CLEANUP
-    -------------------------------------
-    function obj:_releaseEvents()
-        __o_rrpgObjs.removeEventListenerById(self._e0);
-        __o_rrpgObjs.removeEventListenerById(self._e1);
-    end
-
-    obj._oldLFMDestroy = obj.destroy;
-
-    function obj:destroy()
-        self:_releaseEvents();
-
-        if self._oldLFMDestroy then
-            self:_oldLFMDestroy();
+    dataLinkAtributos.onChange = function()
+        if sheet ~= nil then
+            sheet.mod_forca        = calcularMod(sheet.forca)
+            sheet.mod_destreza     = calcularMod(sheet.destreza)
+            sheet.mod_constituicao = calcularMod(sheet.constituicao)
+            sheet.mod_inteligencia = calcularMod(sheet.inteligencia)
+            sheet.mod_sabedoria    = calcularMod(sheet.sabedoria)
+            sheet.mod_carisma      = calcularMod(sheet.carisma)
         end
     end
 
-    return obj;
+    obj.destroy = function(self)
+        if dataLinkAtributos ~= nil then
+            dataLinkAtributos:destroy()
+            dataLinkAtributos = nil
+        end
+
+        if self.handle ~= 0 then
+            _obj_deleteObject(self.handle)
+        end
+    end
+
+    return obj
 end
 
-local _frmMonster = {
-    newEditor = function()
-        return frmMonster:new();
-    end,
-    new = function()
-        return frmMonster:new();
-    end,
-    name = "frmMonster",
+local _frmMob = {
+    newEditor = constructNew_frmMob,
+    new = constructNew_frmMob,
+    name = "frmMob",
     formType = "sheetTemplate",
     formComponentName = "form",
-    title = "Ficha de Mob",
-    description = "Ficha simples de monstro"};
+    title = "Mob"
+}
 
-frmMonster = _frmMonster;
+Firecast.registrarForm(_frmMob)
 
-return frmMonster;
+return _frmMob

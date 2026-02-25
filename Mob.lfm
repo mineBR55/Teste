@@ -1,136 +1,54 @@
-<form name="frmMonster"
-      formType="sheetTemplate"
-      dataType="br.com.mineBR55.mob"
-      width="1000"
-      height="700">
+<form name="frmMob" align="client">
 
-    <dataScopeBox/>
+  <dataScopeBox align="client">
 
     <tabControl align="client">
 
-        <!-- ================= ABA PRINCIPAL ================= -->
-        <tab title="Principal">
+      <!-- ABA PRINCIPAL -->
+      <tab title="Principal">
+        <scrollBox align="client">
 
-            <scrollBox align="client">
+          <layout align="top" height="50">
+            <edit field="nome" left="10" top="10" width="300" height="30"/>
+            <edit field="ca" left="320" top="10" width="60" height="30"/>
+          </layout>
 
-                <flowLayout orientation="vertical" align="top">
+          <!-- ATRIBUTOS -->
+          <layout align="top" height="180">
 
-                    <!-- TÍTULO -->
-                    <label text="MONSTRO"
-                           fontSize="22"
-                           height="40"/>
+            <edit field="forca" left="10" top="10" width="50"/>
+            <edit field="mod_forca" left="65" top="10" width="40" readOnly="true"/>
 
-                    <!-- NOME -->
-                    <edit field="name"
-                          width="350"
-                          height="30"/>
+            <edit field="destreza" left="120" top="10" width="50"/>
+            <edit field="mod_destreza" left="175" top="10" width="40" readOnly="true"/>
 
-                    <horzLine strokeSize="2"/>
+            <edit field="constituicao" left="230" top="10" width="50"/>
+            <edit field="mod_constituicao" left="285" top="10" width="40" readOnly="true"/>
 
-                    <!-- ATRIBUTOS PRINCIPAIS -->
-                    <flowLayout orientation="horizontal" height="40">
+            <edit field="inteligencia" left="10" top="60" width="50"/>
+            <edit field="mod_inteligencia" left="65" top="60" width="40" readOnly="true"/>
 
-                        <label text="CA:" width="40"/>
-                        <edit field="ac" width="60"/>
+            <edit field="sabedoria" left="120" top="60" width="50"/>
+            <edit field="mod_sabedoria" left="175" top="60" width="40" readOnly="true"/>
 
-                        <label text="HP:" width="40"/>
-                        <edit field="hp" width="80"/>
+            <edit field="carisma" left="230" top="60" width="50"/>
+            <edit field="mod_carisma" left="285" top="60" width="40" readOnly="true"/>
 
-                        <label text="/" width="20"/>
-                        <edit field="hpMax" width="80"/>
+          </layout>
 
-                    </flowLayout>
+        </scrollBox>
+      </tab>
 
-                    <!-- DANO / CURA -->
-                    <flowLayout orientation="horizontal" height="40">
-
-                        <edit field="hpInput"
-                              width="200"/>
-
-                        <button name="btnDamage"
-                                text="Dano"
-                                width="80"
-                                height="30"/>
-
-                        <button name="btnHeal"
-                                text="Cura"
-                                width="80"
-                                height="30"/>
-
-                    </flowLayout>
-
-                    <horzLine strokeSize="2"/>
-
-                    <!-- ATRIBUTOS D&D -->
-                    <label text="ATRIBUTOS"
-                           fontSize="18"
-                           height="30"/>
-
-                    <flowLayout orientation="horizontal" height="80">
-
-                        <flowLayout orientation="vertical" width="100">
-                            <label text="FOR"/>
-                            <edit field="str" width="60"/>
-                            <label field="strMod" />
-                        </flowLayout>
-
-                        <flowLayout orientation="vertical" width="100">
-                            <label text="DES"/>
-                            <edit field="dex" width="60"/>
-                            <label field="dexMod" />
-                        </flowLayout>
-
-                        <flowLayout orientation="vertical" width="100">
-                            <label text="CON"/>
-                            <edit field="con" width="60"/>
-                            <label field="conMod" />
-                        </flowLayout>
-
-                        <flowLayout orientation="vertical" width="100">
-                            <label text="INT"/>
-                            <edit field="int" width="60"/>
-                            <label field="intMod" />
-                        </flowLayout>
-
-                        <flowLayout orientation="vertical" width="100">
-                            <label text="SAB"/>
-                            <edit field="wis" width="60"/>
-                            <label field="wisMod" />
-                        </flowLayout>
-
-                        <flowLayout orientation="vertical" width="100">
-                            <label text="CAR"/>
-                            <edit field="cha" width="60"/>
-                            <label field="chaMod" />
-                        </flowLayout>
-
-                    </flowLayout>
-
-                </flowLayout>
-
-            </scrollBox>
-
-        </tab>
-
-        <!-- ================= ABA AÇÕES ================= -->
-        <tab title="Ações">
-
-            <flowLayout orientation="vertical" align="top">
-
-                <button name="btnAddAction"
-                        text="Adicionar Ação"
-                        width="150"
-                        height="30"/>
-
-                <recordList name="rclActions"
-                            field="actions"
-                            templateForm="frmAction"
-                            height="400"/>
-
-            </flowLayout>
-
-        </tab>
+      <!-- ABA AÇÕES -->
+      <tab title="Ações">
+        <recordList 
+          field="listaAcoes"
+          templateForm="frmAction"
+          align="client"/>
+      </tab>
 
     </tabControl>
+
+  </dataScopeBox>
 
 </form>
