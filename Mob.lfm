@@ -4,117 +4,117 @@
     formType="sheetTemplate"
     dataType="br.com.mineBR55.mob"
     width="900"
-    height="700">
+    height="700"
+    theme="dark">
 
     <dataScopeBox/>
 
-    <scrollBox align="client">
+    <layout align="client">
 
-        <!-- HEADER -->
-        <rectangle align="top" height="100" color="#2b2b2b">
+        <scrollBox align="client">
 
-            <layout align="left" width="500">
+            <!-- HEADER -->
+            <rectangle
+                align="top"
+                height="120"
+                color="#2f2f2f">
+
+                <layout align="left" width="500">
+                    <label
+                        text="Nome do Monstro"
+                        align="top"/>
+
+                    <edit
+                        field="name"
+                        align="top"
+                        height="40"
+                        fontSize="20"/>
+                </layout>
+
+                <layout align="right" width="250">
+
+                    <label text="Classe de Armadura" align="top"/>
+                    <edit field="ac" align="top" height="30"/>
+
+                    <label text="HP" align="top"/>
+
+                    <flowLayout align="top" height="30">
+                        <edit field="hp" width="60"/>
+                        <label text="/" width="20"/>
+                        <edit field="hpMax" width="60"/>
+                    </flowLayout>
+
+                </layout>
+
+            </rectangle>
+
+            <!-- ATRIBUTOS -->
+            <rectangle
+                align="top"
+                height="120"
+                color="#242424">
+
                 <label
-                    text="Nome do Monstro"
+                    text="ATRIBUTOS"
                     align="top"
-                    fontSize="12"/>
+                    fontSize="14"/>
 
-                <edit
-                    field="name"
+                <flowLayout
                     align="top"
-                    height="35"
-                    fontSize="20"/>
-            </layout>
+                    height="80">
 
-            <layout align="right" width="250">
+                    <layout width="80">
+                        <label text="FOR"/>
+                        <edit field="str"/>
+                    </layout>
 
-                <label text="Classe de Armadura" align="top"/>
-                <edit field="ac" align="top" height="30"/>
+                    <layout width="80">
+                        <label text="DES"/>
+                        <edit field="dex"/>
+                    </layout>
 
-                <label text="Pontos de Vida" align="top"/>
-                <flowLayout align="top" height="30">
-                    <edit field="hp" width="60"/>
-                    <label text="/" width="20"/>
-                    <edit field="hpMax" width="60"/>
+                    <layout width="80">
+                        <label text="CON"/>
+                        <edit field="con"/>
+                    </layout>
+
+                    <layout width="80">
+                        <label text="INT"/>
+                        <edit field="int"/>
+                    </layout>
+
+                    <layout width="80">
+                        <label text="SAB"/>
+                        <edit field="wis"/>
+                    </layout>
+
+                    <layout width="80">
+                        <label text="CAR"/>
+                        <edit field="cha"/>
+                    </layout>
+
                 </flowLayout>
 
-            </layout>
+            </rectangle>
 
-        </rectangle>
-
-        <!-- ATRIBUTOS -->
-        <rectangle align="top" height="120" color="#1f1f1f">
-
-            <label
-                text="ATRIBUTOS"
+            <!-- DESCRIÇÃO -->
+            <rectangle
                 align="top"
-                fontSize="14"/>
+                height="200"
+                color="#2f2f2f">
 
-            <flowLayout align="top" height="80">
+                <label
+                    text="DESCRIÇÃO"
+                    align="top"/>
 
-                <layout width="80">
-                    <label text="FOR"/>
-                    <edit field="str"/>
-                </layout>
+                <textEditor
+                    field="description"
+                    align="client"/>
 
-                <layout width="80">
-                    <label text="DES"/>
-                    <edit field="dex"/>
-                </layout>
+            </rectangle>
 
-                <layout width="80">
-                    <label text="CON"/>
-                    <edit field="con"/>
-                </layout>
+        </scrollBox>
 
-                <layout width="80">
-                    <label text="INT"/>
-                    <edit field="int"/>
-                </layout>
-
-                <layout width="80">
-                    <label text="SAB"/>
-                    <edit field="wis"/>
-                </layout>
-
-                <layout width="80">
-                    <label text="CAR"/>
-                    <edit field="cha"/>
-                </layout>
-
-            </flowLayout>
-
-        </rectangle>
-
-        <!-- DESCRIÇÃO -->
-        <rectangle align="top" height="200" color="#2b2b2b">
-
-            <label
-                text="DESCRIÇÃO"
-                align="top"
-                fontSize="14"/>
-
-            <textEditor
-                field="description"
-                align="client"/>
-
-        </rectangle>
-
-        <!-- AÇÕES -->
-        <rectangle align="top" height="250" color="#1f1f1f">
-
-            <label
-                text="AÇÕES"
-                align="top"
-                fontSize="14"/>
-
-            <recordList
-                field="actions"
-                align="client"
-                templateForm="frmAction"/>
-
-        </rectangle>
-
-    </scrollBox>
+    </layout>
 
 </form>
