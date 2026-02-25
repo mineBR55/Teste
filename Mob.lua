@@ -1,85 +1,51 @@
 require("firecast.lua");
-local __o_rrpgObjs = require("rrpgObjs.lua");
+require("rrpgObjs.lua");
 require("rrpgGUI.lua");
 require("rrpgDialogs.lua");
-require("rrpgLFM.lua");
 require("ndb.lua");
 
-local frmMonster = {};
-frmMonster.__index = frmMonster;
-
-function frmMonster.new()
+local function newFrmMonster()
     local self = GUI.fromHandle(_obj_newObject("form"));
-    setmetatable(self, frmMonster);
-
     self:setName("frmMonster");
 
-    local sheet = nil;
-
     function self:setNodeObject(nodeObject)
-        sheet = nodeObject;
         self.sheet = nodeObject;
     end
 
-    function self:_releaseEvents()
-        if self._e0 then __o_rrpgObjs.removeEventListenerById(self._e0); end
-        if self._e1 then __o_rrpgObjs.removeEventListenerById(self._e1); end
+    function self:getNodeObject()
+        return self.sheet;
     end
 
-    function self:destroy()
-        self:_releaseEvents();
+    local function calcMod(valor)
+        valor = tonumber(valor) or 10
+        return math.floor((valor - 10) / 2)
     end
+
+    self._e_event0 = self:addEventListener("onNodeReady",
+        function()
+            if self.sheet ~= nil then
+                self.sheet.mod_forca = calcMod(self.sheet.forca)
+                self.sheet.mod_destreza = calcMod(self.sheet.destreza)
+                self.sheet.mod_constituicao = calcMod(self.sheet.constituicao)
+                self.sheet.mod_inteligencia = calcMod(self.sheet.inteligencia)
+                self.sheet.mod_sabedoria = calcMod(self.sheet.sabedoria)
+                self.sheet.mod_carisma = calcMod(self.sheet.carisma)
+            end
+        end);
 
     return self;
 end
 
-function constructNew_frmMonster()
-    local obj = frmMonster.new();
-
-    obj:setFormType("sheetTemplate");
-    obj:setDataType("br.com.mineBR55.mob");
-    obj:setTitle("Ficha de Mob");
-
-    obj._e0 = obj.btnDamage:addEventListener("onClick",
-        function()
-            if obj.sheet ~= nil then
-                local hp = tonumber(obj.sheet.hp) or 0;
-                local dmg = tonumber(obj.sheet.hpInput) or 0;
-                hp = hp - dmg;
-                if hp < 0 then hp = 0; end
-                obj.sheet.hp = hp;
-                obj.sheet.hpInput = "";
-            end
-        end
-    );
-
-    obj._e1 = obj.btnHeal:addEventListener("onClick",
-        function()
-            if obj.sheet ~= nil then
-                local hp = tonumber(obj.sheet.hp) or 0;
-                local heal = tonumber(obj.sheet.hpInput) or 0;
-                hp = hp + heal;
-                obj.sheet.hp = hp;
-                obj.sheet.hpInput = "";
-            end
-        end
-    );
-
-    return obj;
-end
-
-function newfrmMonster()
-    local retObj = constructNew_frmMonster();
-    return retObj;
-end
-
 local _frmMonster = {
-    newEditor = newfrmMonster,
-    new = newfrmMonster,
+    newEditor = newFrmMonster,
+    new = newFrmMonster,
     name = "frmMonster",
-    formType = "sheetTemplate",
     dataType = "br.com.mineBR55.mob",
+    formType = "sheetTemplate",
+    formComponentName = "form",
     title = "Ficha de Mob"
 };
+
+Firecast.registrarForm(_frmMonster);
 
 return _frmMonster;

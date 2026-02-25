@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<form name="frmAction">
+
+    <dataScopeBox/>
+
+    <rectangle align="top" height="120">
+
+        <edit align="top" height="25"
+              field="nome"
+              hint="Nome da Ação"/>
+
+        <edit align="top" height="25"
+              field="bonus"
+              hint="Bonus de Ataque"/>
+
+        <edit align="top" height="25"
+              field="dano"
+              hint="Dano (ex: 2d6+3)"/>
+
+        <button
+            align="top"
+            height="25"
+            text="Rolar"
+            name="btnRoll"/>
+
+    </rectangle>
+
+</form>

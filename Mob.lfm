@@ -3,74 +3,119 @@
     name="frmMonster"
     formType="sheetTemplate"
     dataType="br.com.mineBR55.mob"
-    width="650"
-    height="750">
+    width="900"
+    height="950">
 
     <dataScopeBox/>
 
-    <scrollBox
-        name="scrollBox1"
-        align="client">
+    <scrollBox name="scrollMain" align="client">
 
-        <!-- TÍTULO -->
-        <label
-            align="top"
-            height="30"
-            text="MONSTRO"
-            fontSize="18"/>
+        <!-- ================= HEADER ================= -->
 
-        <edit
-            align="top"
-            height="30"
-            field="name"/>
+        <rectangle align="top" height="120">
 
-        <horzLine
-            align="top"
-            height="5"/>
+            <label align="top" height="30"
+                   text="MONSTRO"
+                   fontSize="22"/>
 
-        <!-- DEFESA -->
-        <label
-            align="top"
-            height="25"
-            text="DEFESA"
-            fontSize="14"/>
+            <edit align="top" height="30"
+                  field="name"/>
 
-        <flowLayout
-            align="top"
-            height="35">
+            <flowLayout align="top" height="35">
+                <label text="AC" width="40"/>
+                <edit field="ac" width="60"/>
 
-            <label text="AC:" width="40"/>
-            <edit field="ac" width="60"/>
+                <label text="HP" width="40"/>
+                <edit field="hp" width="60"/>
 
-            <label text="HP:" width="40"/>
-            <edit field="hp" width="60"/>
+                <label text="/" width="20"/>
+                <edit field="hpMax" width="60"/>
+            </flowLayout>
 
-            <label text="/" width="20"/>
-            <edit field="hpMax" width="60"/>
+        </rectangle>
 
-        </flowLayout>
+        <!-- ================= ATRIBUTOS ================= -->
 
-        <flowLayout
-            align="top"
-            height="35">
+        <rectangle align="top" height="130">
 
-            <edit
-                field="hpInput"
-                width="150"/>
+            <label align="top" height="25"
+                   text="ATRIBUTOS"
+                   fontSize="16"/>
+
+            <flowLayout align="top" height="90">
+
+                <!-- FOR -->
+                <rectangle width="120" height="80">
+                    <label align="top" height="20" text="FOR"/>
+                    <edit align="top" height="30" field="forca"/>
+                    <label align="top" height="20" field="mod_forca"/>
+                </rectangle>
+
+                <!-- DES -->
+                <rectangle width="120" height="80">
+                    <label align="top" height="20" text="DES"/>
+                    <edit align="top" height="30" field="destreza"/>
+                    <label align="top" height="20" field="mod_destreza"/>
+                </rectangle>
+
+                <!-- CON -->
+                <rectangle width="120" height="80">
+                    <label align="top" height="20" text="CON"/>
+                    <edit align="top" height="30" field="constituicao"/>
+                    <label align="top" height="20" field="mod_constituicao"/>
+                </rectangle>
+
+                <!-- INT -->
+                <rectangle width="120" height="80">
+                    <label align="top" height="20" text="INT"/>
+                    <edit align="top" height="30" field="inteligencia"/>
+                    <label align="top" height="20" field="mod_inteligencia"/>
+                </rectangle>
+
+                <!-- SAB -->
+                <rectangle width="120" height="80">
+                    <label align="top" height="20" text="SAB"/>
+                    <edit align="top" height="30" field="sabedoria"/>
+                    <label align="top" height="20" field="mod_sabedoria"/>
+                </rectangle>
+
+                <!-- CAR -->
+                <rectangle width="120" height="80">
+                    <label align="top" height="20" text="CAR"/>
+                    <edit align="top" height="30" field="carisma"/>
+                    <label align="top" height="20" field="mod_carisma"/>
+                </rectangle>
+
+            </flowLayout>
+
+        </rectangle>
+
+        <!-- ================= TRAÇOS ================= -->
+
+        <rectangle align="top" height="200">
+            <label align="top" height="25" text="TRAÇOS"/>
+            <textEditor align="client" field="traits" wordWrap="true"/>
+        </rectangle>
+
+        <!-- ================= AÇÕES (DINÂMICO) ================= -->
+
+        <rectangle align="top" height="300">
+
+            <label align="top" height="25" text="AÇÕES"/>
+
+            <recordList
+                name="rlActions"
+                field="actions"
+                templateForm="frmAction"
+                align="client"/>
 
             <button
-                name="btnDamage"
-                text="Dano"
-                width="60"
-                height="25"/>
+                align="bottom"
+                height="30"
+                text="Adicionar Ação"
+                name="btnAddAction"/>
 
-            <button
-                name="btnHeal"
-                text="Cura"
-                width="60"
-                height="25"/>
-
-        </flowLayout>
+        </rectangle>
 
     </scrollBox>
 
