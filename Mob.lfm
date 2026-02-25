@@ -1,120 +1,136 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<form
-    name="frmMonster"
-    formType="sheetTemplate"
-    dataType="br.com.mineBR55.mob"
-    width="900"
-    height="700"
-    theme="dark">
+<form name="frmMonster"
+      formType="sheetTemplate"
+      dataType="br.com.mineBR55.mob"
+      width="1000"
+      height="700">
 
     <dataScopeBox/>
 
-    <layout align="client">
+    <tabControl align="client">
 
-        <scrollBox align="client">
+        <!-- ================= ABA PRINCIPAL ================= -->
+        <tab title="Principal">
 
-            <!-- HEADER -->
-            <rectangle
-                align="top"
-                height="120"
-                color="#2f2f2f">
+            <scrollBox align="client">
 
-                <layout align="left" width="500">
-                    <label
-                        text="Nome do Monstro"
-                        align="top"/>
+                <flowLayout orientation="vertical" align="top">
 
-                    <edit
-                        field="name"
-                        align="top"
-                        height="40"
-                        fontSize="20"/>
-                </layout>
+                    <!-- TÍTULO -->
+                    <label text="MONSTRO"
+                           fontSize="22"
+                           height="40"/>
 
-                <layout align="right" width="250">
+                    <!-- NOME -->
+                    <edit field="name"
+                          width="350"
+                          height="30"/>
 
-                    <label text="Classe de Armadura" align="top"/>
-                    <edit field="ac" align="top" height="30"/>
+                    <horzLine strokeSize="2"/>
 
-                    <label text="HP" align="top"/>
+                    <!-- ATRIBUTOS PRINCIPAIS -->
+                    <flowLayout orientation="horizontal" height="40">
 
-                    <flowLayout align="top" height="30">
-                        <edit field="hp" width="60"/>
+                        <label text="CA:" width="40"/>
+                        <edit field="ac" width="60"/>
+
+                        <label text="HP:" width="40"/>
+                        <edit field="hp" width="80"/>
+
                         <label text="/" width="20"/>
-                        <edit field="hpMax" width="60"/>
+                        <edit field="hpMax" width="80"/>
+
                     </flowLayout>
 
-                </layout>
+                    <!-- DANO / CURA -->
+                    <flowLayout orientation="horizontal" height="40">
 
-            </rectangle>
+                        <edit field="hpInput"
+                              width="200"/>
 
-            <!-- ATRIBUTOS -->
-            <rectangle
-                align="top"
-                height="120"
-                color="#242424">
+                        <button name="btnDamage"
+                                text="Dano"
+                                width="80"
+                                height="30"/>
 
-                <label
-                    text="ATRIBUTOS"
-                    align="top"
-                    fontSize="14"/>
+                        <button name="btnHeal"
+                                text="Cura"
+                                width="80"
+                                height="30"/>
 
-                <flowLayout
-                    align="top"
-                    height="80">
+                    </flowLayout>
 
-                    <layout width="80">
-                        <label text="FOR"/>
-                        <edit field="str"/>
-                    </layout>
+                    <horzLine strokeSize="2"/>
 
-                    <layout width="80">
-                        <label text="DES"/>
-                        <edit field="dex"/>
-                    </layout>
+                    <!-- ATRIBUTOS D&D -->
+                    <label text="ATRIBUTOS"
+                           fontSize="18"
+                           height="30"/>
 
-                    <layout width="80">
-                        <label text="CON"/>
-                        <edit field="con"/>
-                    </layout>
+                    <flowLayout orientation="horizontal" height="80">
 
-                    <layout width="80">
-                        <label text="INT"/>
-                        <edit field="int"/>
-                    </layout>
+                        <flowLayout orientation="vertical" width="100">
+                            <label text="FOR"/>
+                            <edit field="str" width="60"/>
+                            <label field="strMod" />
+                        </flowLayout>
 
-                    <layout width="80">
-                        <label text="SAB"/>
-                        <edit field="wis"/>
-                    </layout>
+                        <flowLayout orientation="vertical" width="100">
+                            <label text="DES"/>
+                            <edit field="dex" width="60"/>
+                            <label field="dexMod" />
+                        </flowLayout>
 
-                    <layout width="80">
-                        <label text="CAR"/>
-                        <edit field="cha"/>
-                    </layout>
+                        <flowLayout orientation="vertical" width="100">
+                            <label text="CON"/>
+                            <edit field="con" width="60"/>
+                            <label field="conMod" />
+                        </flowLayout>
+
+                        <flowLayout orientation="vertical" width="100">
+                            <label text="INT"/>
+                            <edit field="int" width="60"/>
+                            <label field="intMod" />
+                        </flowLayout>
+
+                        <flowLayout orientation="vertical" width="100">
+                            <label text="SAB"/>
+                            <edit field="wis" width="60"/>
+                            <label field="wisMod" />
+                        </flowLayout>
+
+                        <flowLayout orientation="vertical" width="100">
+                            <label text="CAR"/>
+                            <edit field="cha" width="60"/>
+                            <label field="chaMod" />
+                        </flowLayout>
+
+                    </flowLayout>
 
                 </flowLayout>
 
-            </rectangle>
+            </scrollBox>
 
-            <!-- DESCRIÇÃO -->
-            <rectangle
-                align="top"
-                height="200"
-                color="#2f2f2f">
+        </tab>
 
-                <label
-                    text="DESCRIÇÃO"
-                    align="top"/>
+        <!-- ================= ABA AÇÕES ================= -->
+        <tab title="Ações">
 
-                <textEditor
-                    field="description"
-                    align="client"/>
+            <flowLayout orientation="vertical" align="top">
 
-            </rectangle>
+                <button name="btnAddAction"
+                        text="Adicionar Ação"
+                        width="150"
+                        height="30"/>
 
-        </scrollBox>
+                <recordList name="rclActions"
+                            field="actions"
+                            templateForm="frmAction"
+                            height="400"/>
 
-    </layout>
+            </flowLayout>
+
+        </tab>
+
+    </tabControl>
 
 </form>

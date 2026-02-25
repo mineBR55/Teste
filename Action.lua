@@ -1,5 +1,4 @@
 require("firecast.lua");
-local __o_rrpgObjs = require("rrpgObjs.lua");
 
 local frmAction = {};
 
@@ -11,17 +10,16 @@ function frmAction.new()
 
     function obj:setNodeObject(nodeObject)
         sheet = nodeObject;
-        self.sheet = nodeObject;
+        obj.sheet = nodeObject;
     end
 
     obj._e0 = obj.btnRolar:addEventListener("onClick",
         function()
             if sheet ~= nil then
-                local dado = sheet.dado or "1d20";
-                local mod = sheet.mod or "0";
+                local exp = (sheet.dado or "1d20") .. "+" .. (sheet.mod or "0")
                 Firecast.interpretarRolagem(
                     Firecast.getMesaDe(sheet),
-                    dado .. " + " .. mod,
+                    exp,
                     sheet.nome or "Ação"
                 );
             end
@@ -30,10 +28,15 @@ function frmAction.new()
     return obj;
 end
 
-frmAction = {
+local _frmAction = {
     newEditor = function() return frmAction.new() end,
-    new = function() return frmAction.new() end,
-    name = "frmAction"
+    new       = function() return frmAction.new() end,
+    name      = "frmAction",
+    dataType  = "br.com.mineBR55.mob.action",
+    formType  = "undefined",
+    formComponentName = "form"
 };
 
-return frmAction;
+Firecast.registrarForm(_frmAction);
+
+return _frmAction;
