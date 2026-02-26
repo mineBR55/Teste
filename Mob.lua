@@ -1,73 +1,64 @@
-require("firecast.lua")
-local GUI = require("gui.lua")
+require("firecast.lua");
+local GUI = require("gui.lua");
 
-local function constructNew_frmMob()
-    local obj = GUI.fromHandle(_obj_newObject("form"))
-    obj:setName("frmMob")
-
-    local sheet = nil
-
-    obj.setNodeObject = function(self, nodeObject)
-        sheet = nodeObject
-        self.sheet = nodeObject
-    end
-
-    _gui_assignInitialParentForForm(obj.handle)
-
-    ---------------------------------------------------
-    -- FUNÇÃO DE CÁLCULO
-    ---------------------------------------------------
-    local function calcularMod(valor)
-        valor = tonumber(valor) or 0
-        return math.floor((valor - 10) / 2)
-    end
-
-    ---------------------------------------------------
-    -- DATALINK ATRIBUTOS
-    ---------------------------------------------------
-    local dataLinkAtributos = GUI.fromHandle(_obj_newObject("dataLink"))
-    dataLinkAtributos:setParent(obj)
-    dataLinkAtributos:setFields({
-        "forca","destreza","constituicao",
-        "inteligencia","sabedoria","carisma"
-    })
-
-    dataLinkAtributos.onChange = function()
-        if sheet ~= nil then
-            sheet.mod_forca        = calcularMod(sheet.forca)
-            sheet.mod_destreza     = calcularMod(sheet.destreza)
-            sheet.mod_constituicao = calcularMod(sheet.constituicao)
-            sheet.mod_inteligencia = calcularMod(sheet.inteligencia)
-            sheet.mod_sabedoria    = calcularMod(sheet.sabedoria)
-            sheet.mod_carisma      = calcularMod(sheet.carisma)
-        end
-    end
-
-    obj.destroy = function(self)
-        if dataLinkAtributos ~= nil then
-            dataLinkAtributos:destroy()
-            dataLinkAtributos = nil
-        end
-
-        if self.handle ~= 0 then
-            _obj_deleteObject(self.handle)
-        end
-    end
-
-    return obj
+local function calcularMod(valor)
+    valor = tonumber(valor) or 0
+    return math.floor((valor - 10) / 2)
 end
 
+local function newfrmMob()
+    local obj = GUI.fromHandle(_obj_newObject("form"));
+    obj:setName("frmMob");
+
+    local sheet = nil;
+
+    function obj:setNodeObject(nodeObject)
+        sheet = nodeObject;
+        self.sheet = nodeObject;
+    end;
+
+    local function atualizar()
+        if sheet ~= nil then
+            sheet.mod_forca = calcularMod(sheet.forca)
+            sheet.mod_destreza = calcularMod(sheet.destreza)
+            sheet.mod_constituicao = calcularMod(sheet.constituicao)
+            sheet.mod_inteligencia = calcularMod(sheet.inteligencia)
+            sheet.mod_sabedoria = calcularMod(sheet.sabedoria)
+            sheet.mod_carisma = calcularMod(sheet.carisma)
+        end
+    end
+
+    obj:addEventListener("onNodeReady",
+        function()
+            atualizar();
+        end);
+
+    obj:addEventListener("onNodeChanged",
+        function()
+            atualizar();
+        end);
+
+    obj._oldLFMDestroy = obj.destroy;
+
+    function obj:destroy()
+        if self._oldLFMDestroy then
+            self:_oldLFMDestroy();
+        end;
+    end;
+
+    return obj;
+end;
+
 local _frmMob = {
-    newEditor = constructNew_frmMob,
-    new = constructNew_frmMob,
+    newEditor = newfrmMob,
+    new = newfrmMob,
     name = "frmMob",
+    dataType = "br.com.mineBR55.mob",
     formType = "sheetTemplate",
     formComponentName = "form",
-    title = "Mob",
-    sheetType = "br.com.mineBR55.mob", -- 🔥 IDENTIFICAÇÃO CORRETA
-    description = "Ficha de Monstro MineBR55"
-}
+    title = "Mob"
+};
 
-Firecast.registrarForm(_frmMob)
+Firecast.registrarForm(_frmMob);
 
-return _frmMob
+return _frmMob;

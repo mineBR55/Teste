@@ -1,68 +1,72 @@
-<form name="frmMob" align="client">
+<?xml version="1.0" encoding="UTF-8"?>
+<form name="frmMob"
+      formType="sheetTemplate"
+      dataType="br.com.mineBR55.mob"
+      title="Mob"
+      align="client">
 
   <dataScopeBox align="client">
 
-    <tabControl align="client">
+    <scrollBox align="client">
 
-      <!-- ============================= -->
-      <!-- ABA PRINCIPAL -->
-      <!-- ============================= -->
-      <tab title="Principal">
+      <!-- CABEÇALHO -->
+      <layout align="top" height="80">
 
-        <scrollBox align="client">
+        <label text="Nome" left="10" top="5" width="150" height="20"/>
+        <edit field="nome" left="10" top="25" width="250" height="25"/>
 
-          <!-- Nome e CA -->
-          <layout align="top" height="60">
-            <edit field="nome" left="10" top="10" width="300" height="30" />
-            <edit field="ca" left="320" top="10" width="60" height="30" />
-          </layout>
+        <label text="Tipo de Criatura" left="270" top="5" width="150" height="20"/>
+        <edit field="tipo" left="270" top="25" width="200" height="25"/>
 
-          <!-- ATRIBUTOS -->
-          <layout align="top" height="200">
+      </layout>
 
-            <!-- FORÇA -->
-            <edit field="forca" left="10" top="10" width="50"/>
-            <edit field="mod_forca" left="65" top="10" width="40" readOnly="true"/>
+      <!-- VIDA E CA -->
+      <layout align="top" height="70">
 
-            <!-- DESTREZA -->
-            <edit field="destreza" left="120" top="10" width="50"/>
-            <edit field="mod_destreza" left="175" top="10" width="40" readOnly="true"/>
+        <label text="HP" left="10" top="5" width="100" height="20"/>
+        <edit field="hp" left="10" top="25" width="100" height="25"/>
 
-            <!-- CONSTITUIÇÃO -->
-            <edit field="constituicao" left="230" top="10" width="50"/>
-            <edit field="mod_constituicao" left="285" top="10" width="40" readOnly="true"/>
+        <label text="Classe de Armadura (CA)" left="130" top="5" width="200" height="20"/>
+        <edit field="ca" left="130" top="25" width="100" height="25"/>
 
-            <!-- INTELIGÊNCIA -->
-            <edit field="inteligencia" left="10" top="70" width="50"/>
-            <edit field="mod_inteligencia" left="65" top="70" width="40" readOnly="true"/>
+      </layout>
 
-            <!-- SABEDORIA -->
-            <edit field="sabedoria" left="120" top="70" width="50"/>
-            <edit field="mod_sabedoria" left="175" top="70" width="40" readOnly="true"/>
+      <!-- ATRIBUTOS -->
+      <layout align="top" height="180">
 
-            <!-- CARISMA -->
-            <edit field="carisma" left="230" top="70" width="50"/>
-            <edit field="mod_carisma" left="285" top="70" width="40" readOnly="true"/>
+        <!-- FORÇA -->
+        <label text="Força" left="10" top="5" width="80"/>
+        <edit field="forca" left="10" top="25" width="50" height="25"/>
+        <edit field="mod_forca" left="65" top="25" width="40" height="25" readOnly="true"/>
 
-          </layout>
+        <!-- DESTREZA -->
+        <label text="Destreza" left="110" top="5" width="80"/>
+        <edit field="destreza" left="110" top="25" width="50" height="25"/>
+        <edit field="mod_destreza" left="165" top="25" width="40" height="25" readOnly="true"/>
 
-        </scrollBox>
+        <!-- CONSTITUIÇÃO -->
+        <label text="Constituição" left="210" top="5" width="100"/>
+        <edit field="constituicao" left="210" top="25" width="50" height="25"/>
+        <edit field="mod_constituicao" left="265" top="25" width="40" height="25" readOnly="true"/>
 
-      </tab>
+        <!-- INTELIGÊNCIA -->
+        <label text="Inteligência" left="10" top="70" width="100"/>
+        <edit field="inteligencia" left="10" top="90" width="50" height="25"/>
+        <edit field="mod_inteligencia" left="65" top="90" width="40" height="25" readOnly="true"/>
 
-      <!-- ============================= -->
-      <!-- ABA AÇÕES -->
-      <!-- ============================= -->
-      <tab title="Ações">
+        <!-- SABEDORIA -->
+        <label text="Sabedoria" left="110" top="70" width="100"/>
+        <edit field="sabedoria" left="110" top="90" width="50" height="25"/>
+        <edit field="mod_sabedoria" left="165" top="90" width="40" height="25" readOnly="true"/>
 
-        <recordList
-          field="listaAcoes"
-          templateForm="frmAction"
-          align="client"/>
+        <!-- CARISMA -->
+        <label text="Carisma" left="210" top="70" width="80"/>
+        <edit field="carisma" left="210" top="90" width="50" height="25"/>
+        <edit field="mod_carisma" left="265" top="90" width="40" height="25" readOnly="true"/>
 
-      </tab>
+      </layout>
 
-    </tabControl>
+    </scrollBox>
 
   </dataScopeBox>
 

@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin id="br.com.mineBR55.mob"
-        name="Mob"
+        name="Mob Sheet"
         version="1.0"
         author="MineBR55"
-        sdk="3.0">
+        sdkVersion="3.0">
 
-    <description>
-        Ficha de Monstro MineBR55
-    </description>
-
-    <files>
-        <file name="mob.lfm"/>
-        <file name="mob.lua"/>
-        <file name="action.lfm"/>
-        <file name="action.lua"/>
-    </files>
+    <description>Ficha personalizada de Mob</description>
 
     <sheets>
         <sheetTemplate
-            name="Mob"
+            sheetType="br.com.mineBR55.mob"
             form="frmMob"
-            file="mob.lfm"
-            sheetType="br.com.mineBR55.mob" />
+            file="mob.lfm"/>
     </sheets>
+
+    <forms>
+        <form name="frmMob" file="mob.lfm"/>
+        <form name="frmAction" file="action.lfm"/>
+    </forms>
+
+    <scripts>
+        <script file="mob.lua"/>
+        <script file="action.lua"/>
+    </scripts>
 
 </plugin>
