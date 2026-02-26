@@ -1,61 +1,227 @@
-<form name="frmMob" dataType="br.com.mineBR55.mob">
+<?xml version="1.0" encoding="UTF-8"?>
+<form name="frmMob"
+      formType="sheetTemplate"
+      dataType="br.com.mineBR55.mob"
+      title="Ficha Mob">
 
-    <scrollBox align="client">
+  <!-- Fundo -->
+  <image align="client" src="images/bg.png" style="autoFit"/>
 
-        <layout align="top" height="40">
-            <label text="Nome" width="100"/>
-            <edit field="nome" width="200"/>
+  <scrollBox align="client">
+
+    <layout align="top" height="520">
+      <!-- Painel principal -->
+      <image align="client" src="images/panel.png" style="autoFit"/>
+
+      <!-- Nome -->
+      <layout align="top" height="40">
+        <label align="left" width="90" text="Nome" fontColor="#EDEDED" fontSize="16"/>
+        <edit align="client" field="nome" fontColor="#FFFFFF" height="28"/>
+      </layout>
+
+      <!-- Tipo / Tam / Alinh -->
+      <layout align="top" height="40">
+        <layout align="left" width="280" height="40">
+          <label align="left" width="70" text="Tipo" fontColor="#CCCCCC"/>
+          <edit align="client" field="tipo" fontColor="#FFFFFF" height="28"/>
         </layout>
 
-        <layout align="top" height="40">
-            <label text="Tipo de Criatura" width="150"/>
-            <edit field="tipo" width="200"/>
+        <layout align="left" width="150" height="40">
+          <label align="left" width="70" text="Tam." fontColor="#CCCCCC"/>
+          <edit align="client" field="tamanho" fontColor="#FFFFFF" height="28"/>
         </layout>
 
-        <layout align="top" height="40">
-            <label text="HP" width="50"/>
-            <edit field="hp" width="80"/>
+        <layout align="client" height="40">
+          <label align="left" width="95" text="Alinh." fontColor="#CCCCCC"/>
+          <edit align="client" field="alinhamento" fontColor="#FFFFFF" height="28"/>
+        </layout>
+      </layout>
 
-            <label text="CA" width="50"/>
-            <edit field="ca" width="80"/>
+      <!-- CA / HP / CR / PB -->
+      <layout align="top" height="72">
+        <image align="client" src="images/bar.png" style="autoFit"/>
+
+        <layout align="left" width="140" height="72">
+          <label align="top" height="18" text="CA" fontColor="#E0E0E0"/>
+          <edit align="client" field="ca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
         </layout>
 
-        <layout align="top" height="30">
-            <label text="Força" width="80"/>
-            <edit field="forca" width="50"/>
-            <edit field="mod_forca" width="50" readOnly="true"/>
+        <layout align="left" width="190" height="72">
+          <label align="top" height="18" text="HP" fontColor="#E0E0E0"/>
+          <edit align="client" field="hp" horzTextAlign="center" fontColor="#FFFFFF"/>
         </layout>
 
-        <layout align="top" height="30">
-            <label text="Destreza" width="80"/>
-            <edit field="destreza" width="50"/>
-            <edit field="mod_destreza" width="50" readOnly="true"/>
+        <layout align="left" width="140" height="72">
+          <label align="top" height="18" text="CR" fontColor="#E0E0E0"/>
+          <edit align="client" field="cr" horzTextAlign="center" fontColor="#FFFFFF"/>
         </layout>
 
-        <layout align="top" height="30">
-            <label text="Constituição" width="100"/>
-            <edit field="constituicao" width="50"/>
-            <edit field="mod_constituicao" width="50" readOnly="true"/>
+        <layout align="client" height="72">
+          <label align="top" height="18" text="Prof (PB)" fontColor="#E0E0E0"/>
+          <edit align="client" field="prof_bonus" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+        </layout>
+      </layout>
+
+      <!-- Atributos -->
+      <layout align="top" height="26">
+        <label align="client" text="ATRIBUTOS" fontColor="#EDEDED" fontSize="15"/>
+      </layout>
+
+      <!-- Linha 1 STR DEX CON -->
+      <layout align="top" height="90">
+        <layout align="left" width="180" height="90">
+          <image align="client" src="images/attr_box.png" style="autoFit"/>
+          <layout align="client" height="90">
+            <label align="top" height="18" text="STR" fontColor="#FFFFFF"/>
+            <layout align="client">
+              <edit align="left" width="60" field="forca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+              <edit align="client" field="mod_forca" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
         </layout>
 
-        <layout align="top" height="30">
-            <label text="Inteligência" width="100"/>
-            <edit field="inteligencia" width="50"/>
-            <edit field="mod_inteligencia" width="50" readOnly="true"/>
+        <layout align="left" width="180" height="90">
+          <image align="client" src="images/attr_box.png" style="autoFit"/>
+          <layout align="client" height="90">
+            <label align="top" height="18" text="DEX" fontColor="#FFFFFF"/>
+            <layout align="client">
+              <edit align="left" width="60" field="destreza" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+              <edit align="client" field="mod_destreza" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
         </layout>
 
-        <layout align="top" height="30">
-            <label text="Sabedoria" width="100"/>
-            <edit field="sabedoria" width="50"/>
-            <edit field="mod_sabedoria" width="50" readOnly="true"/>
+        <layout align="client" height="90">
+          <image align="client" src="images/attr_box.png" style="autoFit"/>
+          <layout align="client" height="90">
+            <label align="top" height="18" text="CON" fontColor="#FFFFFF"/>
+            <layout align="client">
+              <edit align="left" width="60" field="constituicao" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+              <edit align="client" field="mod_constituicao" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
+        </layout>
+      </layout>
+
+      <!-- Linha 2 INT WIS CHA -->
+      <layout align="top" height="90">
+
+        <layout align="left" width="180" height="90">
+          <image align="client" src="images/attr_box.png" style="autoFit"/>
+          <layout align="client" height="90">
+            <label align="top" height="18" text="INT" fontColor="#FFFFFF"/>
+            <layout align="client">
+              <edit align="left" width="60" field="inteligencia" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+              <edit align="client" field="mod_inteligencia" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
         </layout>
 
-        <layout align="top" height="30">
-            <label text="Carisma" width="80"/>
-            <edit field="carisma" width="50"/>
-            <edit field="mod_carisma" width="50" readOnly="true"/>
+        <layout align="left" width="180" height="90">
+          <image align="client" src="images/attr_box.png" style="autoFit"/>
+          <layout align="client" height="90">
+            <label align="top" height="18" text="WIS" fontColor="#FFFFFF"/>
+            <layout align="client">
+              <edit align="left" width="60" field="sabedoria" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+              <edit align="client" field="mod_sabedoria" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
         </layout>
 
-    </scrollBox>
+        <layout align="client" height="90">
+          <image align="client" src="images/attr_box.png" style="autoFit"/>
+          <layout align="client" height="90">
+            <label align="top" height="18" text="CHA" fontColor="#FFFFFF"/>
+            <layout align="client">
+              <edit align="left" width="60" field="carisma" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+              <edit align="client" field="mod_carisma" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
+        </layout>
+      </layout>
 
+      <!-- ================= CÁLCULOS (COM CDATA) ================= -->
+
+      <dataLink field="forca">
+        <event name="onChange"><![CDATA[
+          local v = tonumber(sheet.forca) or 0
+          local m = math.floor((v - 10) / 2)
+          if m >= 0 then m = "+" .. m end
+          sheet.mod_forca = m
+        ]]></event>
+      </dataLink>
+
+      <dataLink field="destreza">
+        <event name="onChange"><![CDATA[
+          local v = tonumber(sheet.destreza) or 0
+          local m = math.floor((v - 10) / 2)
+          if m >= 0 then m = "+" .. m end
+          sheet.mod_destreza = m
+        ]]></event>
+      </dataLink>
+
+      <dataLink field="constituicao">
+        <event name="onChange"><![CDATA[
+          local v = tonumber(sheet.constituicao) or 0
+          local m = math.floor((v - 10) / 2)
+          if m >= 0 then m = "+" .. m end
+          sheet.mod_constituicao = m
+        ]]></event>
+      </dataLink>
+
+      <dataLink field="inteligencia">
+        <event name="onChange"><![CDATA[
+          local v = tonumber(sheet.inteligencia) or 0
+          local m = math.floor((v - 10) / 2)
+          if m >= 0 then m = "+" .. m end
+          sheet.mod_inteligencia = m
+        ]]></event>
+      </dataLink>
+
+      <dataLink field="sabedoria">
+        <event name="onChange"><![CDATA[
+          local v = tonumber(sheet.sabedoria) or 0
+          local m = math.floor((v - 10) / 2)
+          if m >= 0 then m = "+" .. m end
+          sheet.mod_sabedoria = m
+        ]]></event>
+      </dataLink>
+
+      <dataLink field="carisma">
+        <event name="onChange"><![CDATA[
+          local v = tonumber(sheet.carisma) or 0
+          local m = math.floor((v - 10) / 2)
+          if m >= 0 then m = "+" .. m end
+          sheet.mod_carisma = m
+        ]]></event>
+      </dataLink>
+
+      <dataLink field="cr">
+        <event name="onChange"><![CDATA[
+          local function parseCR(cr)
+            local s = tostring(cr or ""):gsub("%s+","")
+            if s == "" then return 0 end
+            if s == "1/8" then return 0.125 end
+            if s == "1/4" then return 0.25 end
+            if s == "1/2" then return 0.5 end
+            local n = tonumber(s)
+            if n ~= nil then return n end
+            return 0
+          end
+
+          local function sign(n)
+            if n >= 0 then return "+" .. tostring(n) end
+            return tostring(n)
+          end
+
+          local crVal = parseCR(sheet.cr)
+          local pb = 2 + math.floor((crVal + 3) / 4)
+          if pb < 2 then pb = 2 end
+          if pb > 9 then pb = 9 end
+          sheet.prof_bonus = sign(pb)
+        ]]></event>
+      </dataLink>
+
+    </layout>
+  </scrollBox>
 </form>

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module sdkVersion="3.7b">
-    <id>br.com.mineBR55.mob</id>
-    <version>1.0</version>
-    <info lang="pt-BR">
-        <name>Ficha Monstro DnD</name>
-        <description>Ficha de monstro personalizada</description>
-        <author>MineBR55</author>
-    </info>
+  <id>br.com.mineBR55.mob</id>
+  <version>1.0</version>
+
+  <info lang="pt-BR">
+    <name>Ficha Monstro DnD</name>
+    <description>Plugin de ficha de monstro (SDK3)</description>
+    <author>mineBR55</author>
+    <site>https://github.com/mineBR55/Teste</site>
+    <contact>minebr55@gmail.com</contact>
+  </info>
 </module>
