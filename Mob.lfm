@@ -1,73 +1,61 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<form name="frmMob"
-      formType="sheetTemplate"
-      dataType="br.com.mineBR55.mob"
-      title="Mob"
-      align="client">
-
-  <dataScopeBox align="client">
+<form name="frmMob" dataType="br.com.mineBR55.mob">
 
     <scrollBox align="client">
 
-      <!-- CABEÇALHO -->
-      <layout align="top" height="80">
+        <layout align="top" height="40">
+            <label text="Nome" width="100"/>
+            <edit field="nome" width="200"/>
+        </layout>
 
-        <label text="Nome" left="10" top="5" width="150" height="20"/>
-        <edit field="nome" left="10" top="25" width="250" height="25"/>
+        <layout align="top" height="40">
+            <label text="Tipo de Criatura" width="150"/>
+            <edit field="tipo" width="200"/>
+        </layout>
 
-        <label text="Tipo de Criatura" left="270" top="5" width="150" height="20"/>
-        <edit field="tipo" left="270" top="25" width="200" height="25"/>
+        <layout align="top" height="40">
+            <label text="HP" width="50"/>
+            <edit field="hp" width="80"/>
 
-      </layout>
+            <label text="CA" width="50"/>
+            <edit field="ca" width="80"/>
+        </layout>
 
-      <!-- VIDA E CA -->
-      <layout align="top" height="70">
+        <layout align="top" height="30">
+            <label text="Força" width="80"/>
+            <edit field="forca" width="50"/>
+            <edit field="mod_forca" width="50" readOnly="true"/>
+        </layout>
 
-        <label text="HP" left="10" top="5" width="100" height="20"/>
-        <edit field="hp" left="10" top="25" width="100" height="25"/>
+        <layout align="top" height="30">
+            <label text="Destreza" width="80"/>
+            <edit field="destreza" width="50"/>
+            <edit field="mod_destreza" width="50" readOnly="true"/>
+        </layout>
 
-        <label text="Classe de Armadura (CA)" left="130" top="5" width="200" height="20"/>
-        <edit field="ca" left="130" top="25" width="100" height="25"/>
+        <layout align="top" height="30">
+            <label text="Constituição" width="100"/>
+            <edit field="constituicao" width="50"/>
+            <edit field="mod_constituicao" width="50" readOnly="true"/>
+        </layout>
 
-      </layout>
+        <layout align="top" height="30">
+            <label text="Inteligência" width="100"/>
+            <edit field="inteligencia" width="50"/>
+            <edit field="mod_inteligencia" width="50" readOnly="true"/>
+        </layout>
 
-      <!-- ATRIBUTOS -->
-      <layout align="top" height="180">
+        <layout align="top" height="30">
+            <label text="Sabedoria" width="100"/>
+            <edit field="sabedoria" width="50"/>
+            <edit field="mod_sabedoria" width="50" readOnly="true"/>
+        </layout>
 
-        <!-- FORÇA -->
-        <label text="Força" left="10" top="5" width="80"/>
-        <edit field="forca" left="10" top="25" width="50" height="25"/>
-        <edit field="mod_forca" left="65" top="25" width="40" height="25" readOnly="true"/>
-
-        <!-- DESTREZA -->
-        <label text="Destreza" left="110" top="5" width="80"/>
-        <edit field="destreza" left="110" top="25" width="50" height="25"/>
-        <edit field="mod_destreza" left="165" top="25" width="40" height="25" readOnly="true"/>
-
-        <!-- CONSTITUIÇÃO -->
-        <label text="Constituição" left="210" top="5" width="100"/>
-        <edit field="constituicao" left="210" top="25" width="50" height="25"/>
-        <edit field="mod_constituicao" left="265" top="25" width="40" height="25" readOnly="true"/>
-
-        <!-- INTELIGÊNCIA -->
-        <label text="Inteligência" left="10" top="70" width="100"/>
-        <edit field="inteligencia" left="10" top="90" width="50" height="25"/>
-        <edit field="mod_inteligencia" left="65" top="90" width="40" height="25" readOnly="true"/>
-
-        <!-- SABEDORIA -->
-        <label text="Sabedoria" left="110" top="70" width="100"/>
-        <edit field="sabedoria" left="110" top="90" width="50" height="25"/>
-        <edit field="mod_sabedoria" left="165" top="90" width="40" height="25" readOnly="true"/>
-
-        <!-- CARISMA -->
-        <label text="Carisma" left="210" top="70" width="80"/>
-        <edit field="carisma" left="210" top="90" width="50" height="25"/>
-        <edit field="mod_carisma" left="265" top="90" width="40" height="25" readOnly="true"/>
-
-      </layout>
+        <layout align="top" height="30">
+            <label text="Carisma" width="80"/>
+            <edit field="carisma" width="50"/>
+            <edit field="mod_carisma" width="50" readOnly="true"/>
+        </layout>
 
     </scrollBox>
-
-  </dataScopeBox>
 
 </form>
