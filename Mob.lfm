@@ -4,47 +4,62 @@
 
     <tabControl align="client">
 
+      <!-- ============================= -->
       <!-- ABA PRINCIPAL -->
+      <!-- ============================= -->
       <tab title="Principal">
+
         <scrollBox align="client">
 
-          <layout align="top" height="50">
-            <edit field="nome" left="10" top="10" width="300" height="30"/>
-            <edit field="ca" left="320" top="10" width="60" height="30"/>
+          <!-- Nome e CA -->
+          <layout align="top" height="60">
+            <edit field="nome" left="10" top="10" width="300" height="30" />
+            <edit field="ca" left="320" top="10" width="60" height="30" />
           </layout>
 
           <!-- ATRIBUTOS -->
-          <layout align="top" height="180">
+          <layout align="top" height="200">
 
+            <!-- FORÇA -->
             <edit field="forca" left="10" top="10" width="50"/>
             <edit field="mod_forca" left="65" top="10" width="40" readOnly="true"/>
 
+            <!-- DESTREZA -->
             <edit field="destreza" left="120" top="10" width="50"/>
             <edit field="mod_destreza" left="175" top="10" width="40" readOnly="true"/>
 
+            <!-- CONSTITUIÇÃO -->
             <edit field="constituicao" left="230" top="10" width="50"/>
             <edit field="mod_constituicao" left="285" top="10" width="40" readOnly="true"/>
 
-            <edit field="inteligencia" left="10" top="60" width="50"/>
-            <edit field="mod_inteligencia" left="65" top="60" width="40" readOnly="true"/>
+            <!-- INTELIGÊNCIA -->
+            <edit field="inteligencia" left="10" top="70" width="50"/>
+            <edit field="mod_inteligencia" left="65" top="70" width="40" readOnly="true"/>
 
-            <edit field="sabedoria" left="120" top="60" width="50"/>
-            <edit field="mod_sabedoria" left="175" top="60" width="40" readOnly="true"/>
+            <!-- SABEDORIA -->
+            <edit field="sabedoria" left="120" top="70" width="50"/>
+            <edit field="mod_sabedoria" left="175" top="70" width="40" readOnly="true"/>
 
-            <edit field="carisma" left="230" top="60" width="50"/>
-            <edit field="mod_carisma" left="285" top="60" width="40" readOnly="true"/>
+            <!-- CARISMA -->
+            <edit field="carisma" left="230" top="70" width="50"/>
+            <edit field="mod_carisma" left="285" top="70" width="40" readOnly="true"/>
 
           </layout>
 
         </scrollBox>
+
       </tab>
 
+      <!-- ============================= -->
       <!-- ABA AÇÕES -->
+      <!-- ============================= -->
       <tab title="Ações">
-        <recordList 
+
+        <recordList
           field="listaAcoes"
           templateForm="frmAction"
           align="client"/>
+
       </tab>
 
     </tabControl>

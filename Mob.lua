@@ -7,7 +7,6 @@ local function constructNew_frmMob()
 
     local sheet = nil
 
-    -- CORRETO: usa ponto, não dois pontos
     obj.setNodeObject = function(self, nodeObject)
         sheet = nodeObject
         self.sheet = nodeObject
@@ -16,7 +15,7 @@ local function constructNew_frmMob()
     _gui_assignInitialParentForForm(obj.handle)
 
     ---------------------------------------------------
-    -- FUNÇÃO DE CÁLCULO DE MODIFICADOR
+    -- FUNÇÃO DE CÁLCULO
     ---------------------------------------------------
     local function calcularMod(valor)
         valor = tonumber(valor) or 0
@@ -64,7 +63,9 @@ local _frmMob = {
     name = "frmMob",
     formType = "sheetTemplate",
     formComponentName = "form",
-    title = "Mob"
+    title = "Mob",
+    sheetType = "br.com.mineBR55.mob", -- 🔥 IDENTIFICAÇÃO CORRETA
+    description = "Ficha de Monstro MineBR55"
 }
 
 Firecast.registrarForm(_frmMob)

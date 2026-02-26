@@ -14,37 +14,6 @@ local function constructNew_frmAction()
 
     _gui_assignInitialParentForForm(obj.handle)
 
-    -------------------------------------------------
-    -- BOTÃO ROLAR
-    -------------------------------------------------
-    local btnRolar = GUI.fromHandle(_obj_newObject("button"))
-    btnRolar:setParent(obj)
-    btnRolar:setText("Rolar")
-    btnRolar:setAlign("right")
-    btnRolar:setWidth(80)
-
-    btnRolar.onClick = function()
-        if sheet ~= nil then
-            local mesa = Firecast.getMesaDe(sheet)
-            if mesa ~= nil then
-                local bonus = tonumber(sheet.bonusAtaque) or 0
-                mesa.chat:rolarDados("1d20+" .. bonus,
-                    sheet.nomeAcao or "Ataque")
-            end
-        end
-    end
-
-    obj.destroy = function(self)
-        if btnRolar ~= nil then
-            btnRolar:destroy()
-            btnRolar = nil
-        end
-
-        if self.handle ~= 0 then
-            _obj_deleteObject(self.handle)
-        end
-    end
-
     return obj
 end
 
