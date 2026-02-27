@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form name="frmTraits">
+  <layout align="top" height="30">
+    <label text="Traços" left="10" top="5" width="60" height="20"/>
+    <edit field="nomeTraits" left="70" top="3" width="300" height="25"/>
+  </layout>
+</form>
