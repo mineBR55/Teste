@@ -121,6 +121,117 @@
           <!-- ===== Barra superior modular (sem vazar) ===== -->
           <layout align="top" height="10"/>
 
+<!-- ===== MOVIMENTAÇÃO + SENTIDOS (LABEL EM CIMA + GRID) ===== -->
+<layout align="top" height="8"/>
+
+<flowLayout align="top" height="220">
+
+  <!-- MOVIMENTAÇÃO -->
+  <layout width="520" height="110">
+    <label align="top" height="18" text="Movimentação" fontColor="#E0E0E0"/>
+
+    <!-- linha 1 -->
+    <layout align="top" height="46">
+      <layout align="left" width="170" height="46">
+        <label align="top" height="16" text="Walk" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="120" field="spd_walk" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+
+      <layout align="left" width="170" height="46">
+        <label align="top" height="16" text="Climb" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="120" field="spd_climb" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+
+      <layout align="left" width="170" height="46">
+        <label align="top" height="16" text="Fly" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="120" field="spd_fly" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+    </layout>
+
+    <!-- linha 2 -->
+    <layout align="top" height="46">
+      <layout align="left" width="170" height="46">
+        <label align="top" height="16" text="Swim" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="120" field="spd_swim" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+
+      <layout align="left" width="170" height="46">
+        <label align="top" height="16" text="Burrow" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="120" field="spd_burrow" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+
+      <layout align="left" width="170" height="46"/>
+    </layout>
+  </layout>
+
+  <!-- SENTIDOS -->
+  <layout width="520" height="125">
+    <label align="top" height="18" text="Sentidos" fontColor="#E0E0E0"/>
+
+    <!-- linha 1 -->
+    <layout align="top" height="46">
+      <layout align="left" width="250" height="46">
+        <label align="top" height="16" text="Blindsight" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="190" field="sns_blindsight" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+
+      <layout align="left" width="250" height="46">
+        <label align="top" height="16" text="Darkvision" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="190" field="sns_darkvision" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+    </layout>
+
+    <!-- linha 2 -->
+    <layout align="top" height="46">
+      <layout align="left" width="250" height="46">
+        <label align="top" height="16" text="Tremorsense" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="190" field="sns_tremorsense" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+
+      <layout align="left" width="250" height="46">
+        <label align="top" height="16" text="Truesight" fontColor="#FFFFFF"/>
+        <layout align="client" height="30">
+          <edit  align="left" width="190" field="sns_truesight" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+          <label align="client" text="m" fontColor="#CCCCCC"/>
+        </layout>
+      </layout>
+    </layout>
+
+    <!-- passiva -->
+    <layout align="top" height="30">
+      <label align="left" width="170" text="Percepção Passiva" fontColor="#FFFFFF"/>
+      <edit  align="left" width="80" field="passive_perception" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <label align="client" text="(10 + Perception)" fontColor="#888888"/>
+    </layout>
+
+  </layout>
+
+</flowLayout>
+
           <flowLayout align="top" height="80">
             <layout width="110" height="70">
               <label align="top" height="18" text="CA" fontColor="#E0E0E0"/>
@@ -166,62 +277,92 @@
           </flowLayout>
 
           <!-- ===== ATRIBUTOS ===== -->
-          <layout align="top" height="12"/>
-          <layout align="top" height="26">
-            <label align="client" text="ATRIBUTOS" fontColor="#EDEDED" fontSize="15"/>
-          </layout>
+<layout align="top" height="12"/>
+<layout align="top" height="26">
+  <label align="client" text="ATRIBUTOS" fontColor="#EDEDED" fontSize="15"/>
+</layout>
 
-          <flowLayout align="top" height="80">
-            <layout width="330" height="34">
-              <label align="left" width="60" text="STR" fontColor="#FFFFFF"/>
-              <edit  align="left" width="60" field="forca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <edit  align="left" width="70" field="mod_forca" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("STR Check", sheet.mod_forca_num); ]]></event></button>
-            </layout>
+<!-- 2 colunas: não vaza e mantém alinhado -->
+<layout align="top" height="110">
+  <!-- Coluna esquerda -->
+  <layout align="left" width="430" height="110">
 
-            <layout width="330" height="34">
-              <label align="left" width="60" text="DEX" fontColor="#FFFFFF"/>
-              <edit  align="left" width="60" field="destreza" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <edit  align="left" width="70" field="mod_destreza" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("DEX Check", sheet.mod_destreza_num); ]]></event></button>
-            </layout>
+    <layout align="top" height="34">
+      <label align="left" width="50" text="STR" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="forca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="mod_forca" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <button align="left" width="90" text="Roll">
+        <event name="onClick"><![CDATA[ rollBonus("STR Check", sheet.mod_forca_num); ]]></event>
+      </button>
+    </layout>
 
-            <layout width="330" height="34">
-              <label align="left" width="60" text="CON" fontColor="#FFFFFF"/>
-              <edit  align="left" width="60" field="constituicao" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <edit  align="left" width="70" field="mod_constituicao" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("CON Check", sheet.mod_constituicao_num); ]]></event></button>
-            </layout>
+    <layout align="top" height="34">
+      <label align="left" width="50" text="CON" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="constituicao" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="mod_constituicao" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <button align="left" width="90" text="Roll">
+        <event name="onClick"><![CDATA[ rollBonus("CON Check", sheet.mod_constituicao_num); ]]></event>
+      </button>
+    </layout>
 
-            <layout width="330" height="34">
-              <label align="left" width="60" text="INT" fontColor="#FFFFFF"/>
-              <edit  align="left" width="60" field="inteligencia" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <edit  align="left" width="70" field="mod_inteligencia" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("INT Check", sheet.mod_inteligencia_num); ]]></event></button>
-            </layout>
+    <layout align="top" height="34">
+      <label align="left" width="50" text="WIS" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="sabedoria" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="mod_sabedoria" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <button align="left" width="90" text="Roll">
+        <event name="onClick"><![CDATA[ rollBonus("WIS Check", sheet.mod_sabedoria_num); ]]></event>
+      </button>
+    </layout>
 
-            <layout width="330" height="34">
-              <label align="left" width="60" text="WIS" fontColor="#FFFFFF"/>
-              <edit  align="left" width="60" field="sabedoria" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <edit  align="left" width="70" field="mod_sabedoria" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("WIS Check", sheet.mod_sabedoria_num); ]]></event></button>
-            </layout>
+  </layout>
 
-            <layout width="330" height="34">
-              <label align="left" width="60" text="CHA" fontColor="#FFFFFF"/>
-              <edit  align="left" width="60" field="carisma" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <edit  align="left" width="70" field="mod_carisma" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-              <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("CHA Check", sheet.mod_carisma_num); ]]></event></button>
-            </layout>
-          </flowLayout>
+  <!-- Espaço entre colunas -->
+  <layout align="left" width="30" height="110"/>
 
-          <!-- Rolagem livre -->
-          <layout align="top" height="10"/>
-          <layout align="top" height="32">
-            <label align="left" width="140" text="Rolagem Livre" fontColor="#FFFFFF"/>
-            <edit align="left" width="300" field="roll_livre" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollExpr("Rolagem Livre", sheet.roll_livre); ]]></event></button>
-          </layout>
+  <!-- Coluna direita -->
+  <layout align="client" height="110">
+
+    <layout align="top" height="34">
+      <label align="left" width="50" text="DEX" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="destreza" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="mod_destreza" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <button align="left" width="90" text="Roll">
+        <event name="onClick"><![CDATA[ rollBonus("DEX Check", sheet.mod_destreza_num); ]]></event>
+      </button>
+    </layout>
+
+    <layout align="top" height="34">
+      <label align="left" width="50" text="INT" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="inteligencia" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="mod_inteligencia" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <button align="left" width="90" text="Roll">
+        <event name="onClick"><![CDATA[ rollBonus("INT Check", sheet.mod_inteligencia_num); ]]></event>
+      </button>
+    </layout>
+
+    <layout align="top" height="34">
+      <label align="left" width="50" text="CHA" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="carisma" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <edit  align="left" width="60" field="mod_carisma" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+      <button align="left" width="90" text="Roll">
+        <event name="onClick"><![CDATA[ rollBonus("CHA Check", sheet.mod_carisma_num); ]]></event>
+      </button>
+    </layout>
+
+  </layout>
+</layout>
+
+<!-- Rolagem livre (sem botão gigante) -->
+<layout align="top" height="10"/>
+<layout align="top" height="34">
+  <label align="left" width="140" text="Rolagem Livre" fontColor="#FFFFFF"/>
+  <edit align="client" field="roll_livre" fontColor="#FFFFFF"/>
+  <button align="right" width="140" text="Roll">
+    <event name="onClick"><![CDATA[
+      rollExpr("Rolagem Livre", sheet.roll_livre);
+    ]]></event>
+  </button>
+</layout>
 
           <!-- ===== SAVES ===== -->
           <layout align="top" height="12"/>
