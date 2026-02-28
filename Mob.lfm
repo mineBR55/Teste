@@ -5,6 +5,9 @@
       title="Ficha Mob">
 
   <script><![CDATA[
+    require("firecast.lua");
+    require("ndb.lua");
+    
     local function num(v)
       local n = tonumber(v)
       return n or 0
@@ -21,6 +24,12 @@
     local function signed(n)
       n = num(n)
       if n >= 0 then return "+" .. tostring(n) else return tostring(n) end
+    end
+
+    local function clamp(n, a, b)
+      if n < a then return a end
+      if n > b then return b end
+      return n
     end
 
     function buildD20(bonus)
@@ -77,864 +86,1050 @@
         mesa.chat:rolarDados(Firecast.interpretarRolagem(resolved), title .. " (" .. resolved .. ")")
       end
     end
+    function recalcAll()
+  sheet.forca = sheet.forca
+  sheet.destreza = sheet.destreza
+  sheet.constituicao = sheet.constituicao
+  sheet.inteligencia = sheet.inteligencia
+  sheet.sabedoria = sheet.sabedoria
+  sheet.carisma = sheet.carisma
 
+  sheet.hp_atual = sheet.hp_atual
+end
     _G.__num = num
     _G.__mod = mod
     _G.__signed = signed
     _G.__profBonus = profBonus
+    _G.__clamp = clamp
+
   ]]></script>
 
-  <scrollBox align="client">
-    <layout align="top" height="2600">
+  <tabControl align="client">
 
-      <!-- fundo -->
-      <layout align="top" height="2600">
-        <image align="client" src="images/bg.png" style="autoFit"/>
-        <image align="client" src="images/panel.png" style="autoFit"/>
+    <!-- ===================== ABA FRENTE ===================== -->
+    <tab text="Frente">
+      <scrollBox align="client">
+        <layout align="top" height="2800">
 
-        <layout align="client">
+          <!-- fundo -->
+          <layout align="top" height="2800">
+            <image align="client" src="images/bg.png" style="autoFit"/>
+            <image align="client" src="images/panel.png" style="autoFit"/>
 
-          <!-- ===== Cabeçalho ===== -->
-          <layout align="top" height="40">
-            <label align="left" width="90" text="Nome" fontColor="#EDEDED" fontSize="16"/>
-            <edit  align="client" field="nome" fontColor="#FFFFFF" height="28"/>
-          </layout>
+            <layout align="client">
 
-          <!-- bloco modular (quebra linha em janela menor) -->
-          <flowLayout align="top" height="70">
-            <layout width="310" height="34">
-              <label align="left" width="70" text="Tipo" fontColor="#CCCCCC"/>
-              <edit  align="client" field="tipo" fontColor="#FFFFFF" height="28"/>
-            </layout>
+              <!-- ===== Cabeçalho ===== -->
+              <layout align="top" height="40">
+                <label align="left" width="90" text="Nome" fontColor="#EDEDED" fontSize="16"/>
+                <edit  align="client" field="nome" fontColor="#FFFFFF" height="28"/>
+              </layout>
 
-            <layout width="190" height="34">
-              <label align="left" width="70" text="Tam." fontColor="#CCCCCC"/>
-              <edit  align="client" field="tamanho" fontColor="#FFFFFF" height="28"/>
-            </layout>
+              <flowLayout align="top" height="70">
+                <layout width="310" height="34">
+                  <label align="left" width="70" text="Tipo" fontColor="#CCCCCC"/>
+                  <edit  align="client" field="tipo" fontColor="#FFFFFF" height="28"/>
+                </layout>
 
-            <layout width="320" height="34">
-              <label align="left" width="95" text="Alinh." fontColor="#CCCCCC"/>
-              <edit  align="client" field="alinhamento" fontColor="#FFFFFF" height="28"/>
-            </layout>
-          </flowLayout>
+                <layout width="190" height="34">
+                  <label align="left" width="70" text="Tam." fontColor="#CCCCCC"/>
+                  <edit  align="client" field="tamanho" fontColor="#FFFFFF" height="28"/>
+                </layout>
 
-          <!-- ===== Barra superior modular (sem vazar) ===== -->
-          <layout align="top" height="10"/>
+                <layout width="320" height="34">
+                  <label align="left" width="95" text="Alinh." fontColor="#CCCCCC"/>
+                  <edit  align="client" field="alinhamento" fontColor="#FFFFFF" height="28"/>
+                </layout>
+              </flowLayout>
 
-<!-- ===== MOVIMENTAÇÃO + SENTIDOS (LABEL EM CIMA + GRID) ===== -->
-<layout align="top" height="8"/>
+              <!-- ===== MOVIMENTAÇÃO + SENTIDOS (LABEL EM CIMA + GRID) ===== -->
+              <layout align="top" height="8"/>
 
-<flowLayout align="top" height="220">
+              <flowLayout align="top" height="220">
 
-  <!-- MOVIMENTAÇÃO -->
-  <layout width="520" height="110">
-    <label align="top" height="18" text="Movimentação" fontColor="#E0E0E0"/>
+                <!-- MOVIMENTAÇÃO -->
+                <layout width="520" height="110">
+                  <label align="top" height="18" text="Movimentação" fontColor="#E0E0E0"/>
 
-    <!-- linha 1 -->
-    <layout align="top" height="46">
-      <layout align="left" width="170" height="46">
-        <label align="top" height="16" text="Walk" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="120" field="spd_walk" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
+                  <!-- linha 1 -->
+                  <layout align="top" height="46">
+                    <layout align="left" width="170" height="46">
+                      <label align="top" height="16" text="Walk" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="120" field="spd_walk" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
 
-      <layout align="left" width="170" height="46">
-        <label align="top" height="16" text="Climb" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="120" field="spd_climb" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
+                    <layout align="left" width="170" height="46">
+                      <label align="top" height="16" text="Climb" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="120" field="spd_climb" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
 
-      <layout align="left" width="170" height="46">
-        <label align="top" height="16" text="Fly" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="120" field="spd_fly" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
-    </layout>
+                    <layout align="left" width="170" height="46">
+                      <label align="top" height="16" text="Fly" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="120" field="spd_fly" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
+                  </layout>
 
-    <!-- linha 2 -->
-    <layout align="top" height="46">
-      <layout align="left" width="170" height="46">
-        <label align="top" height="16" text="Swim" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="120" field="spd_swim" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
+                  <!-- linha 2 -->
+                  <layout align="top" height="46">
+                    <layout align="left" width="170" height="46">
+                      <label align="top" height="16" text="Swim" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="120" field="spd_swim" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
 
-      <layout align="left" width="170" height="46">
-        <label align="top" height="16" text="Burrow" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="120" field="spd_burrow" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
+                    <layout align="left" width="170" height="46">
+                      <label align="top" height="16" text="Burrow" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="120" field="spd_burrow" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
 
-      <layout align="left" width="170" height="46"/>
-    </layout>
-  </layout>
+                    <layout align="left" width="170" height="46"/>
+                  </layout>
+                </layout>
 
-  <!-- SENTIDOS -->
-  <layout width="520" height="125">
-    <label align="top" height="18" text="Sentidos" fontColor="#E0E0E0"/>
+                <!-- SENTIDOS -->
+                <layout width="520" height="125">
+                  <label align="top" height="18" text="Sentidos" fontColor="#E0E0E0"/>
 
-    <!-- linha 1 -->
-    <layout align="top" height="46">
-      <layout align="left" width="250" height="46">
-        <label align="top" height="16" text="Blindsight" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="190" field="sns_blindsight" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
+                  <!-- linha 1 -->
+                  <layout align="top" height="46">
+                    <layout align="left" width="250" height="46">
+                      <label align="top" height="16" text="Blindsight" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="190" field="sns_blindsight" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
 
-      <layout align="left" width="250" height="46">
-        <label align="top" height="16" text="Darkvision" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="190" field="sns_darkvision" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
-    </layout>
+                    <layout align="left" width="250" height="46">
+                      <label align="top" height="16" text="Darkvision" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="190" field="sns_darkvision" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
+                  </layout>
 
-    <!-- linha 2 -->
-    <layout align="top" height="46">
-      <layout align="left" width="250" height="46">
-        <label align="top" height="16" text="Tremorsense" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="190" field="sns_tremorsense" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
+                  <!-- linha 2 -->
+                  <layout align="top" height="46">
+                    <layout align="left" width="250" height="46">
+                      <label align="top" height="16" text="Tremorsense" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="190" field="sns_tremorsense" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
 
-      <layout align="left" width="250" height="46">
-        <label align="top" height="16" text="Truesight" fontColor="#FFFFFF"/>
-        <layout align="client" height="30">
-          <edit  align="left" width="190" field="sns_truesight" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-          <label align="client" text="m" fontColor="#CCCCCC"/>
-        </layout>
-      </layout>
-    </layout>
+                    <layout align="left" width="250" height="46">
+                      <label align="top" height="16" text="Truesight" fontColor="#FFFFFF"/>
+                      <layout align="client" height="30">
+                        <edit  align="left" width="190" field="sns_truesight" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                        <label align="client" text="m" fontColor="#CCCCCC"/>
+                      </layout>
+                    </layout>
+                  </layout>
 
-    <!-- passiva -->
-    <layout align="top" height="30">
-      <label align="left" width="170" text="Percepção Passiva" fontColor="#FFFFFF"/>
-      <edit  align="left" width="80" field="passive_perception" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label align="client" text="(10 + Perception)" fontColor="#888888"/>
-    </layout>
+                  <!-- passiva -->
+                  <layout align="top" height="30">
+                    <label align="left" width="170" text="Percepção Passiva" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="80" field="passive_perception" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <label align="client" text="(10 + Perception)" fontColor="#888888"/>
+                  </layout>
+                </layout>
 
-  </layout>
+              </flowLayout>
 
-</flowLayout>
+              <!-- ===== Barra superior modular (sem vazar) ===== -->
+              <layout align="top" height="10"/>
 
-          <flowLayout align="top" height="80">
-            <layout width="110" height="70">
-              <label align="top" height="18" text="CA" fontColor="#E0E0E0"/>
-              <edit  align="client" field="ca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            </layout>
+              <flowLayout align="top" height="80">
+                <layout width="110" height="70">
+                  <label align="top" height="18" text="CA" fontColor="#E0E0E0"/>
+                  <edit  align="client" field="ca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                </layout>
 
-            <layout width="140" height="70">
-              <label align="top" height="18" text="HP Máx" fontColor="#E0E0E0"/>
-              <edit  align="client" field="hp_max" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            </layout>
+                <layout width="140" height="70">
+                  <label align="top" height="18" text="HP Máx" fontColor="#E0E0E0"/>
+                  <edit  align="client" field="hp_max" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                </layout>
 
-            <layout width="140" height="70">
-              <label align="top" height="18" text="HP Atual" fontColor="#E0E0E0"/>
-              <edit  align="client" field="hp_atual" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            </layout>
+                <layout width="140" height="70">
+                  <label align="top" height="18" text="HP Atual" fontColor="#E0E0E0"/>
+                  <edit  align="client" field="hp_atual" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                </layout>
 
-            <layout width="110" height="70">
-              <label align="top" height="18" text="CR" fontColor="#E0E0E0"/>
-              <edit  align="client" field="cr" horzTextAlign="center" fontColor="#FFFFFF"/>
-            </layout>
+                <layout width="110" height="70">
+                  <label align="top" height="18" text="CR" fontColor="#E0E0E0"/>
+                  <edit  align="client" field="cr" horzTextAlign="center" fontColor="#FFFFFF"/>
+                </layout>
 
-            <layout width="110" height="70">
-              <label align="top" height="18" text="PB" fontColor="#E0E0E0"/>
-              <edit  align="client" field="prof_bonus" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            </layout>
+                <layout width="110" height="70">
+                  <label align="top" height="18" text="PB" fontColor="#E0E0E0"/>
+                  <edit  align="client" field="prof_bonus" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                </layout>
 
-            <layout width="250" height="70">
-              <label align="top" height="18" text="Vida (%)" fontColor="#E0E0E0"/>
-              <progressBar align="top" height="18" field="hp_pct" min="0" max="100"/>
-              <layout align="client">
-                <edit align="left" width="60" field="hp_pct_txt" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-                <button align="left" width="60" text="-1">
-                  <event name="onClick"><![CDATA[ sheet.hp_atual = (__num(sheet.hp_atual) - 1); ]]></event>
-                </button>
-                <button align="left" width="60" text="+1">
-                  <event name="onClick"><![CDATA[ sheet.hp_atual = (__num(sheet.hp_atual) + 1); ]]></event>
-                </button>
-                <button align="client" text="Reset">
-                  <event name="onClick"><![CDATA[ sheet.hp_atual = __num(sheet.hp_max); ]]></event>
+                <layout width="250" height="70">
+                  <label align="top" height="18" text="Vida (%)" fontColor="#E0E0E0"/>
+                  <progressBar align="top" height="18" field="hp_pct" min="0" max="100"/>
+                  <layout align="client">
+                    <edit align="left" width="60" field="hp_pct_txt" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="60" text="-1">
+                      <event name="onClick"><![CDATA[ sheet.hp_atual = (__num(sheet.hp_atual) - 1); ]]></event>
+                    </button>
+                    <button align="left" width="60" text="+1">
+                      <event name="onClick"><![CDATA[ sheet.hp_atual = (__num(sheet.hp_atual) + 1); ]]></event>
+                    </button>
+                    <button align="client" text="Reset">
+                      <event name="onClick"><![CDATA[ sheet.hp_atual = __num(sheet.hp_max); ]]></event>
+                    </button>
+                  </layout>
+                </layout>
+              </flowLayout>
+
+              <!-- ===== ATRIBUTOS (2 colunas) ===== -->
+              <layout align="top" height="12"/>
+              <layout align="top" height="26">
+                <label align="client" text="ATRIBUTOS" fontColor="#EDEDED" fontSize="15"/>
+              </layout>
+
+              <layout align="top" height="110">
+                <!-- Coluna esquerda -->
+                <layout align="left" width="430" height="110">
+
+                  <layout align="top" height="34">
+                    <label align="left" width="50" text="STR" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="forca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="mod_forca" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="90" text="Roll">
+                      <event name="onClick"><![CDATA[ rollBonus("STR Check", sheet.mod_forca_num); ]]></event>
+                    </button>
+                  </layout>
+
+                  <layout align="top" height="34">
+                    <label align="left" width="50" text="CON" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="constituicao" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="mod_constituicao" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="90" text="Roll">
+                      <event name="onClick"><![CDATA[ rollBonus("CON Check", sheet.mod_constituicao_num); ]]></event>
+                    </button>
+                  </layout>
+
+                  <layout align="top" height="34">
+                    <label align="left" width="50" text="WIS" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="sabedoria" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="mod_sabedoria" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="90" text="Roll">
+                      <event name="onClick"><![CDATA[ rollBonus("WIS Check", sheet.mod_sabedoria_num); ]]></event>
+                    </button>
+                  </layout>
+
+                </layout>
+
+                <layout align="left" width="30" height="110"/>
+
+                <!-- Coluna direita -->
+                <layout align="client" height="110">
+
+                  <layout align="top" height="34">
+                    <label align="left" width="50" text="DEX" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="destreza" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="mod_destreza" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="90" text="Roll">
+                      <event name="onClick"><![CDATA[ rollBonus("DEX Check", sheet.mod_destreza_num); ]]></event>
+                    </button>
+                  </layout>
+
+                  <layout align="top" height="34">
+                    <label align="left" width="50" text="INT" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="inteligencia" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="mod_inteligencia" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="90" text="Roll">
+                      <event name="onClick"><![CDATA[ rollBonus("INT Check", sheet.mod_inteligencia_num); ]]></event>
+                    </button>
+                  </layout>
+
+                  <layout align="top" height="34">
+                    <label align="left" width="50" text="CHA" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="carisma" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <edit  align="left" width="60" field="mod_carisma" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                    <button align="left" width="90" text="Roll">
+                      <event name="onClick"><![CDATA[ rollBonus("CHA Check", sheet.mod_carisma_num); ]]></event>
+                    </button>
+                  </layout>
+
+                </layout>
+              </layout>
+
+              <!-- Rolagem livre -->
+              <layout align="top" height="10"/>
+              <layout align="top" height="34">
+                <label align="left" width="140" text="Rolagem Livre" fontColor="#FFFFFF"/>
+                <edit align="client" field="roll_livre" fontColor="#FFFFFF"/>
+                <button align="right" width="140" text="Roll">
+                  <event name="onClick"><![CDATA[ rollExpr("Rolagem Livre", sheet.roll_livre); ]]></event>
                 </button>
               </layout>
+
+              <!-- ===== SAVES ===== -->
+              <layout align="top" height="12"/>
+              <layout align="top" height="26">
+                <label align="client" text="SAVES" fontColor="#EDEDED" fontSize="15"/>
+              </layout>
+
+              <layout align="top" height="24">
+                <label align="left" width="170" text="Save" fontColor="#CCCCCC"/>
+                <label align="left" width="60" text="Prof" fontColor="#CCCCCC"/>
+                <label align="left" width="60" text="Exp" fontColor="#CCCCCC"/>
+                <label align="left" width="70" text="Misc" fontColor="#CCCCCC"/>
+                <label align="left" width="90" text="Total" fontColor="#CCCCCC"/>
+                <label align="client" text="" fontColor="#CCCCCC"/>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="170" text="STR Save" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sv_str_prof" text=""/>
+                <checkBox align="left" width="60" field="sv_str_exp" text=""/>
+                <edit align="left" width="70" field="sv_str_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sv_str_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("STR Save", sheet.sv_str_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="170" text="DEX Save" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sv_dex_prof" text=""/>
+                <checkBox align="left" width="60" field="sv_dex_exp" text=""/>
+                <edit align="left" width="70" field="sv_dex_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sv_dex_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("DEX Save", sheet.sv_dex_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="170" text="CON Save" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sv_con_prof" text=""/>
+                <checkBox align="left" width="60" field="sv_con_exp" text=""/>
+                <edit align="left" width="70" field="sv_con_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sv_con_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("CON Save", sheet.sv_con_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="170" text="INT Save" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sv_int_prof" text=""/>
+                <checkBox align="left" width="60" field="sv_int_exp" text=""/>
+                <edit align="left" width="70" field="sv_int_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sv_int_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("INT Save", sheet.sv_int_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="170" text="WIS Save" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sv_wis_prof" text=""/>
+                <checkBox align="left" width="60" field="sv_wis_exp" text=""/>
+                <edit align="left" width="70" field="sv_wis_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sv_wis_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("WIS Save", sheet.sv_wis_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="170" text="CHA Save" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sv_cha_prof" text=""/>
+                <checkBox align="left" width="60" field="sv_cha_exp" text=""/>
+                <edit align="left" width="70" field="sv_cha_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sv_cha_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("CHA Save", sheet.sv_cha_total_num); ]]></event></button>
+              </layout>
+
+              <!-- ===== SKILLS / INICIATIVA ===== -->
+              <layout align="top" height="12"/>
+              <layout align="top" height="26">
+                <label align="client" text="SKILLS / INICIATIVA" fontColor="#EDEDED" fontSize="15"/>
+              </layout>
+
+              <layout align="top" height="24">
+                <label align="left" width="240" text="Skill" fontColor="#CCCCCC"/>
+                <label align="left" width="60" text="Prof" fontColor="#CCCCCC"/>
+                <label align="left" width="60" text="Exp" fontColor="#CCCCCC"/>
+                <label align="left" width="70" text="Misc" fontColor="#CCCCCC"/>
+                <label align="left" width="90" text="Total" fontColor="#CCCCCC"/>
+                <label align="client" text="" fontColor="#CCCCCC"/>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Initiative (DEX)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_initiative_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_initiative_exp" text=""/>
+                <edit align="left" width="70" field="sk_initiative_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_initiative_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Initiative", sheet.sk_initiative_total_num); ]]></event></button>
+              </layout>
+
+              <!-- Skills (mesmo set que você já vinha usando) -->
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Athletics (STR)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_athletics_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_athletics_exp" text=""/>
+                <edit align="left" width="70" field="sk_athletics_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_athletics_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Athletics", sheet.sk_athletics_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Acrobatics (DEX)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_acrobatics_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_acrobatics_exp" text=""/>
+                <edit align="left" width="70" field="sk_acrobatics_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_acrobatics_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Acrobatics", sheet.sk_acrobatics_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Sleight of Hand (DEX)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_sleight_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_sleight_exp" text=""/>
+                <edit align="left" width="70" field="sk_sleight_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_sleight_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Sleight of Hand", sheet.sk_sleight_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Stealth (DEX)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_stealth_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_stealth_exp" text=""/>
+                <edit align="left" width="70" field="sk_stealth_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_stealth_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Stealth", sheet.sk_stealth_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Arcana (INT)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_arcana_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_arcana_exp" text=""/>
+                <edit align="left" width="70" field="sk_arcana_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_arcana_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Arcana", sheet.sk_arcana_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="History (INT)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_history_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_history_exp" text=""/>
+                <edit align="left" width="70" field="sk_history_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_history_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("History", sheet.sk_history_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Investigation (INT)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_investigation_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_investigation_exp" text=""/>
+                <edit align="left" width="70" field="sk_investigation_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_investigation_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Investigation", sheet.sk_investigation_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Nature (INT)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_nature_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_nature_exp" text=""/>
+                <edit align="left" width="70" field="sk_nature_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_nature_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Nature", sheet.sk_nature_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Religion (INT)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_religion_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_religion_exp" text=""/>
+                <edit align="left" width="70" field="sk_religion_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_religion_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Religion", sheet.sk_religion_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Animal Handling (WIS)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_animal_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_animal_exp" text=""/>
+                <edit align="left" width="70" field="sk_animal_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_animal_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Animal Handling", sheet.sk_animal_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Insight (WIS)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_insight_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_insight_exp" text=""/>
+                <edit align="left" width="70" field="sk_insight_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_insight_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Insight", sheet.sk_insight_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Medicine (WIS)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_medicine_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_medicine_exp" text=""/>
+                <edit align="left" width="70" field="sk_medicine_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_medicine_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Medicine", sheet.sk_medicine_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Perception (WIS)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_perception_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_perception_exp" text=""/>
+                <edit align="left" width="70" field="sk_perception_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_perception_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Perception", sheet.sk_perception_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Survival (WIS)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_survival_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_survival_exp" text=""/>
+                <edit align="left" width="70" field="sk_survival_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_survival_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Survival", sheet.sk_survival_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Deception (CHA)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_deception_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_deception_exp" text=""/>
+                <edit align="left" width="70" field="sk_deception_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_deception_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Deception", sheet.sk_deception_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Intimidation (CHA)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_intimidation_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_intimidation_exp" text=""/>
+                <edit align="left" width="70" field="sk_intimidation_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_intimidation_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Intimidation", sheet.sk_intimidation_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Performance (CHA)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_performance_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_performance_exp" text=""/>
+                <edit align="left" width="70" field="sk_performance_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_performance_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Performance", sheet.sk_performance_total_num); ]]></event></button>
+              </layout>
+
+              <layout align="top" height="28">
+                <label align="left" width="240" text="Persuasion (CHA)" fontColor="#FFFFFF"/>
+                <checkBox align="left" width="60" field="sk_persuasion_prof" text=""/>
+                <checkBox align="left" width="60" field="sk_persuasion_exp" text=""/>
+                <edit align="left" width="70" field="sk_persuasion_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit align="left" width="90" field="sk_persuasion_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Persuasion", sheet.sk_persuasion_total_num); ]]></event></button>
+              </layout>
+
+              <!-- ===================== CÁLCULOS ===================== -->
+
+              <!-- CR -> PB (tabela oficial 5e) -->
+<dataLink field="cr">
+  <event name="onChange"><![CDATA[
+    local function parseCR(cr)
+      local s = tostring(cr or ""):gsub("%s+","")
+      if s == "" then return 0 end
+      if s == "1/8" then return 0.125 end
+      if s == "1/4" then return 0.25 end
+      if s == "1/2" then return 0.5 end
+      local n = tonumber(s); if n ~= nil then return n end
+      return 0
+    end
+
+    local function pbFromCR(crVal)
+      -- 5e: CR 0–4 => +2; 5–8 => +3; 9–12 => +4; 13–16 => +5; 17–20 => +6; 21–24 => +7; 25–28 => +8; 29–30 => +9
+      if crVal < 5 then return 2 end
+      if crVal < 9 then return 3 end
+      if crVal < 13 then return 4 end
+      if crVal < 17 then return 5 end
+      if crVal < 21 then return 6 end
+      if crVal < 25 then return 7 end
+      if crVal < 29 then return 8 end
+      return 9
+    end
+
+    local crVal = parseCR(sheet.cr)
+    local pb = pbFromCR(crVal)
+
+    sheet.prof_bonus_num = pb
+    sheet.prof_bonus = __signed(pb)
+
+    -- força recálculo de tudo que depende do PB
+    if recalcAll ~= nil then
+      recalcAll()
+    else
+      sheet.forca = sheet.forca
+      sheet.destreza = sheet.destreza
+      sheet.constituicao = sheet.constituicao
+      sheet.inteligencia = sheet.inteligencia
+      sheet.sabedoria = sheet.sabedoria
+      sheet.carisma = sheet.carisma
+    end
+  ]]></event>
+</dataLink>
+
+              <!-- Vida % -->
+              <dataLink field="hp_max"><event name="onChange"><![CDATA[ sheet.hp_atual = sheet.hp_atual ]]></event></dataLink>
+              <dataLink field="hp_atual">
+                <event name="onChange"><![CDATA[
+                  local maxv = __num(sheet.hp_max)
+                  local curv = __num(sheet.hp_atual)
+
+                  if maxv <= 0 then
+                    sheet.hp_pct = 0
+                    sheet.hp_pct_txt = "0"
+                    return
+                  end
+
+                  local pct = math.floor((curv / maxv) * 100 + 0.5)
+                  if pct < 0 then pct = 0 end
+                  if pct > 100 then pct = 100 end
+
+                  sheet.hp_pct = pct
+                  sheet.hp_pct_txt = tostring(pct)
+                ]]></event>
+              </dataLink>
+
+              <!-- STR -->
+              <dataLink field="forca">
+                <event name="onChange"><![CDATA[
+                  local m = __mod(sheet.forca)
+                  sheet.mod_forca_num = m
+                  sheet.mod_forca = __signed(m)
+
+                  local sv = m + __profBonus("sv_str_prof","sv_str_exp") + __num(sheet.sv_str_misc)
+                  sheet.sv_str_total_num = sv
+                  sheet.sv_str_total = __signed(sv)
+
+                  local t = m + __profBonus("sk_athletics_prof","sk_athletics_exp") + __num(sheet.sk_athletics_misc)
+                  sheet.sk_athletics_total_num = t
+                  sheet.sk_athletics_total = __signed(t)
+                ]]></event>
+              </dataLink>
+
+              <!-- DEX -->
+              <dataLink field="destreza">
+                <event name="onChange"><![CDATA[
+                  local m = __mod(sheet.destreza)
+                  sheet.mod_destreza_num = m
+                  sheet.mod_destreza = __signed(m)
+
+                  local sv = m + __profBonus("sv_dex_prof","sv_dex_exp") + __num(sheet.sv_dex_misc)
+                  sheet.sv_dex_total_num = sv
+                  sheet.sv_dex_total = __signed(sv)
+
+                  local t
+                  t = m + __profBonus("sk_initiative_prof","sk_initiative_exp") + __num(sheet.sk_initiative_misc)
+                  sheet.sk_initiative_total_num = t
+                  sheet.sk_initiative_total = __signed(t)
+
+                  t = m + __profBonus("sk_acrobatics_prof","sk_acrobatics_exp") + __num(sheet.sk_acrobatics_misc)
+                  sheet.sk_acrobatics_total_num = t
+                  sheet.sk_acrobatics_total = __signed(t)
+
+                  t = m + __profBonus("sk_sleight_prof","sk_sleight_exp") + __num(sheet.sk_sleight_misc)
+                  sheet.sk_sleight_total_num = t
+                  sheet.sk_sleight_total = __signed(t)
+
+                  t = m + __profBonus("sk_stealth_prof","sk_stealth_exp") + __num(sheet.sk_stealth_misc)
+                  sheet.sk_stealth_total_num = t
+                  sheet.sk_stealth_total = __signed(t)
+                ]]></event>
+              </dataLink>
+
+              <!-- CON -->
+              <dataLink field="constituicao">
+                <event name="onChange"><![CDATA[
+                  local m = __mod(sheet.constituicao)
+                  sheet.mod_constituicao_num = m
+                  sheet.mod_constituicao = __signed(m)
+
+                  local sv = m + __profBonus("sv_con_prof","sv_con_exp") + __num(sheet.sv_con_misc)
+                  sheet.sv_con_total_num = sv
+                  sheet.sv_con_total = __signed(sv)
+                ]]></event>
+              </dataLink>
+
+              <!-- INT -->
+              <dataLink field="inteligencia">
+                <event name="onChange"><![CDATA[
+                  local m = __mod(sheet.inteligencia)
+                  sheet.mod_inteligencia_num = m
+                  sheet.mod_inteligencia = __signed(m)
+
+                  local sv = m + __profBonus("sv_int_prof","sv_int_exp") + __num(sheet.sv_int_misc)
+                  sheet.sv_int_total_num = sv
+                  sheet.sv_int_total = __signed(sv)
+
+                  local t
+                  t = m + __profBonus("sk_arcana_prof","sk_arcana_exp") + __num(sheet.sk_arcana_misc)
+                  sheet.sk_arcana_total_num = t
+                  sheet.sk_arcana_total = __signed(t)
+
+                  t = m + __profBonus("sk_history_prof","sk_history_exp") + __num(sheet.sk_history_misc)
+                  sheet.sk_history_total_num = t
+                  sheet.sk_history_total = __signed(t)
+
+                  t = m + __profBonus("sk_investigation_prof","sk_investigation_exp") + __num(sheet.sk_investigation_misc)
+                  sheet.sk_investigation_total_num = t
+                  sheet.sk_investigation_total = __signed(t)
+
+                  t = m + __profBonus("sk_nature_prof","sk_nature_exp") + __num(sheet.sk_nature_misc)
+                  sheet.sk_nature_total_num = t
+                  sheet.sk_nature_total = __signed(t)
+
+                  t = m + __profBonus("sk_religion_prof","sk_religion_exp") + __num(sheet.sk_religion_misc)
+                  sheet.sk_religion_total_num = t
+                  sheet.sk_religion_total = __signed(t)
+                ]]></event>
+              </dataLink>
+
+              <!-- WIS -->
+              <dataLink field="sabedoria">
+                <event name="onChange"><![CDATA[
+                  local m = __mod(sheet.sabedoria)
+                  sheet.mod_sabedoria_num = m
+                  sheet.mod_sabedoria = __signed(m)
+
+                  local sv = m + __profBonus("sv_wis_prof","sv_wis_exp") + __num(sheet.sv_wis_misc)
+                  sheet.sv_wis_total_num = sv
+                  sheet.sv_wis_total = __signed(sv)
+
+                  local t
+                  t = m + __profBonus("sk_animal_prof","sk_animal_exp") + __num(sheet.sk_animal_misc)
+                  sheet.sk_animal_total_num = t
+                  sheet.sk_animal_total = __signed(t)
+
+                  t = m + __profBonus("sk_insight_prof","sk_insight_exp") + __num(sheet.sk_insight_misc)
+                  sheet.sk_insight_total_num = t
+                  sheet.sk_insight_total = __signed(t)
+
+                  t = m + __profBonus("sk_medicine_prof","sk_medicine_exp") + __num(sheet.sk_medicine_misc)
+                  sheet.sk_medicine_total_num = t
+                  sheet.sk_medicine_total = __signed(t)
+
+                  t = m + __profBonus("sk_perception_prof","sk_perception_exp") + __num(sheet.sk_perception_misc)
+                  sheet.sk_perception_total_num = t
+                  sheet.sk_perception_total = __signed(t)
+
+                  -- Passive Perception = 10 + Perception total
+                  local pp = 10 + t
+                  sheet.passive_perception_num = pp
+                  sheet.passive_perception = tostring(pp)
+
+                  t = m + __profBonus("sk_survival_prof","sk_survival_exp") + __num(sheet.sk_survival_misc)
+                  sheet.sk_survival_total_num = t
+                  sheet.sk_survival_total = __signed(t)
+                ]]></event>
+              </dataLink>
+
+              <!-- CHA -->
+              <dataLink field="carisma">
+                <event name="onChange"><![CDATA[
+                  local m = __mod(sheet.carisma)
+                  sheet.mod_carisma_num = m
+                  sheet.mod_carisma = __signed(m)
+
+                  local sv = m + __profBonus("sv_cha_prof","sv_cha_exp") + __num(sheet.sv_cha_misc)
+                  sheet.sv_cha_total_num = sv
+                  sheet.sv_cha_total = __signed(sv)
+
+                  local t
+                  t = m + __profBonus("sk_deception_prof","sk_deception_exp") + __num(sheet.sk_deception_misc)
+                  sheet.sk_deception_total_num = t
+                  sheet.sk_deception_total = __signed(t)
+
+                  t = m + __profBonus("sk_intimidation_prof","sk_intimidation_exp") + __num(sheet.sk_intimidation_misc)
+                  sheet.sk_intimidation_total_num = t
+                  sheet.sk_intimidation_total = __signed(t)
+
+                  t = m + __profBonus("sk_performance_prof","sk_performance_exp") + __num(sheet.sk_performance_misc)
+                  sheet.sk_performance_total_num = t
+                  sheet.sk_performance_total = __signed(t)
+
+                  t = m + __profBonus("sk_persuasion_prof","sk_persuasion_exp") + __num(sheet.sk_persuasion_misc)
+                  sheet.sk_persuasion_total_num = t
+                  sheet.sk_persuasion_total = __signed(t)
+                ]]></event>
+              </dataLink>
+
+              <!-- Recalc triggers: Saves -->
+              <!-- Recalc triggers (RESPONSIVO): Saves -->
+<dataLink field="sv_str_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_str_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_str_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sv_dex_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_dex_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_dex_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sv_con_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_con_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_con_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sv_int_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_int_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_int_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sv_wis_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_wis_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_wis_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sv_cha_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_cha_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sv_cha_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<!-- Recalc triggers (RESPONSIVO): Skills -->
+<dataLink field="sk_initiative_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_initiative_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_initiative_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_athletics_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_athletics_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_athletics_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_acrobatics_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_acrobatics_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_acrobatics_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_sleight_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_sleight_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_sleight_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_stealth_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_stealth_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_stealth_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_arcana_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_arcana_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_arcana_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_history_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_history_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_history_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_investigation_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_investigation_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_investigation_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_nature_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_nature_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_nature_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_religion_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_religion_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_religion_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_animal_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_animal_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_animal_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_insight_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_insight_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_insight_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_medicine_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_medicine_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_medicine_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_perception_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_perception_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_perception_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_survival_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_survival_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_survival_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_deception_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_deception_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_deception_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_intimidation_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_intimidation_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_intimidation_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_performance_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_performance_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_performance_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+
+<dataLink field="sk_persuasion_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_persuasion_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_persuasion_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
             </layout>
-          </flowLayout>
-
-          <!-- ===== ATRIBUTOS ===== -->
-<layout align="top" height="12"/>
-<layout align="top" height="26">
-  <label align="client" text="ATRIBUTOS" fontColor="#EDEDED" fontSize="15"/>
-</layout>
-
-<!-- 2 colunas: não vaza e mantém alinhado -->
-<layout align="top" height="110">
-  <!-- Coluna esquerda -->
-  <layout align="left" width="430" height="110">
-
-    <layout align="top" height="34">
-      <label align="left" width="50" text="STR" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="forca" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="mod_forca" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <button align="left" width="90" text="Roll">
-        <event name="onClick"><![CDATA[ rollBonus("STR Check", sheet.mod_forca_num); ]]></event>
-      </button>
-    </layout>
-
-    <layout align="top" height="34">
-      <label align="left" width="50" text="CON" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="constituicao" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="mod_constituicao" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <button align="left" width="90" text="Roll">
-        <event name="onClick"><![CDATA[ rollBonus("CON Check", sheet.mod_constituicao_num); ]]></event>
-      </button>
-    </layout>
-
-    <layout align="top" height="34">
-      <label align="left" width="50" text="WIS" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="sabedoria" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="mod_sabedoria" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <button align="left" width="90" text="Roll">
-        <event name="onClick"><![CDATA[ rollBonus("WIS Check", sheet.mod_sabedoria_num); ]]></event>
-      </button>
-    </layout>
-
-  </layout>
-
-  <!-- Espaço entre colunas -->
-  <layout align="left" width="30" height="110"/>
-
-  <!-- Coluna direita -->
-  <layout align="client" height="110">
-
-    <layout align="top" height="34">
-      <label align="left" width="50" text="DEX" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="destreza" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="mod_destreza" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <button align="left" width="90" text="Roll">
-        <event name="onClick"><![CDATA[ rollBonus("DEX Check", sheet.mod_destreza_num); ]]></event>
-      </button>
-    </layout>
-
-    <layout align="top" height="34">
-      <label align="left" width="50" text="INT" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="inteligencia" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="mod_inteligencia" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <button align="left" width="90" text="Roll">
-        <event name="onClick"><![CDATA[ rollBonus("INT Check", sheet.mod_inteligencia_num); ]]></event>
-      </button>
-    </layout>
-
-    <layout align="top" height="34">
-      <label align="left" width="50" text="CHA" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="carisma" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <edit  align="left" width="60" field="mod_carisma" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <button align="left" width="90" text="Roll">
-        <event name="onClick"><![CDATA[ rollBonus("CHA Check", sheet.mod_carisma_num); ]]></event>
-      </button>
-    </layout>
-
-  </layout>
-</layout>
-
-<!-- Rolagem livre (sem botão gigante) -->
-<layout align="top" height="10"/>
-<layout align="top" height="34">
-  <label align="left" width="140" text="Rolagem Livre" fontColor="#FFFFFF"/>
-  <edit align="client" field="roll_livre" fontColor="#FFFFFF"/>
-  <button align="right" width="140" text="Roll">
-    <event name="onClick"><![CDATA[
-      rollExpr("Rolagem Livre", sheet.roll_livre);
-    ]]></event>
-  </button>
-</layout>
-
-          <!-- ===== SAVES ===== -->
-          <layout align="top" height="12"/>
-          <layout align="top" height="26">
-            <label align="client" text="SAVES" fontColor="#EDEDED" fontSize="15"/>
           </layout>
 
-          <layout align="top" height="24">
-            <label align="left" width="170" text="Save" fontColor="#CCCCCC"/>
-            <label align="left" width="60" text="Prof" fontColor="#CCCCCC"/>
-            <label align="left" width="60" text="Exp" fontColor="#CCCCCC"/>
-            <label align="left" width="70" text="Misc" fontColor="#CCCCCC"/>
-            <label align="left" width="90" text="Total" fontColor="#CCCCCC"/>
-            <label align="client" text="" fontColor="#CCCCCC"/>
+        </layout>
+      </scrollBox>
+    </tab>
+<dataLink field="nome">
+  <event name="onChange"><![CDATA[
+    setCurrentSheet(sheet);
+  ]]></event>
+</dataLink>
+   <!-- ===================== ABA TRAITS/EXTRAS (EMBUTIDA; SEM <frame>) ===================== -->
+    <tab text="Traits / Extras">
+      <scrollBox align="client">
+        <layout align="top" height="1700">
+          <image align="client" src="bg.png" style="autoFit"/>
+          <image align="client" src="panel.png" style="autoFit"/>
+
+          <layout align="client">
+            <layout align="top" height="40">
+              <label align="client" text="TRAITS / EXTRAS" fontColor="#EDEDED" fontSize="16"/>
+            </layout>
+
+            <layout align="top" height="10"/>
+
+            <layout align="top" height="28">
+              <label align="client" text="Traits" fontColor="#FFFFFF" fontSize="14"/>
+            </layout>
+
+            <layout align="top" height="300">
+              <textEditor align="client" field="traits_texto" fontColor="#FFFFFF"/>
+            </layout>
+
+            <layout align="top" height="16"/>
+
+            <layout align="top" height="28">
+              <label align="client" text="Resistências / Imunidades" fontColor="#FFFFFF" fontSize="14"/>
+            </layout>
+
+            <layout align="top" height="240">
+              <textEditor align="client" field="resist_imune_texto" fontColor="#FFFFFF"/>
+            </layout>
+
+            <layout align="top" height="16"/>
+
+            <layout align="top" height="28">
+              <label align="client" text="Idiomas / Observações" fontColor="#FFFFFF" fontSize="14"/>
+            </layout>
+
+            <layout align="top" height="240">
+              <textEditor align="client" field="idiomas_obs_texto" fontColor="#FFFFFF"/>
+            </layout>
+          </layout>
+        </layout>
+      </scrollBox>
+    </tab>
+    <!-- ===================== ABA Ações (EMBUTIDA; SEM <frame>) ===================== -->
+<tab text="Ações">
+  <scrollBox align="client">
+    <layout align="client">
+
+      <!-- Título -->
+      <layout align="top" height="40">
+        <label align="client" text="AÇÕES" fontColor="#EDEDED" fontSize="16"/>
+      </layout>
+
+      <layout align="top" height="10"/>
+
+      <!-- =========================
+           CAIXA DE ATAQUES
+           ========================= -->
+      <layout align="top" height="320">
+        <!-- Fundo da caixa -->
+        <rectangle align="client" color="#000000" opacity="0.18" xradius="8" yradius="8"/>
+
+        <!-- Conteúdo interno com padding "manual" -->
+        <layout align="client">
+          <layout align="top" height="10"/>
+
+          <layout align="top" height="45">
+            <button left="10" top="0" width="220" height="35" text="Adicionar Ataque">
+              <event name="onClick"><![CDATA[
+  local n = self.rclAttacks:append();
+  if n ~= nil then
+    n.name = n.name or "Ataque";
+    n.toHit = n.toHit or "0";
+    n.damage = n.damage or "1d6+0";
+    n.dmgType = n.dmgType or "";
+    n.notes = n.notes or "";
+  else
+    showMessage("Não consegui adicionar item na lista (append retornou nil).");
+  end
+]]></event>
+            </button>
           </layout>
 
-          <!-- Saves: STR/DEX/CON/INT/WIS/CHA -->
-          <layout align="top" height="28">
-            <label align="left" width="170" text="STR Save" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sv_str_prof" text=""/>
-            <checkBox align="left" width="60" field="sv_str_exp" text=""/>
-            <edit align="left" width="70" field="sv_str_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sv_str_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("STR Save", sheet.sv_str_total_num); ]]></event></button>
+          <layout align="top" height="8"/>
+
+          <!-- Cabeçalho -->
+          <layout align="top" height="22">
+            <label left="10" top="0" width="220" height="22" text="Nome" fontColor="#CCCCCC"/>
+            <label left="240" top="0" width="70"  height="22" text="To Hit" fontColor="#CCCCCC"/>
+            <label left="320" top="0" width="160" height="22" text="Dano" fontColor="#CCCCCC"/>
+            <label left="490" top="0" width="120" height="22" text="Tipo" fontColor="#CCCCCC"/>
           </layout>
 
-          <layout align="top" height="28">
-            <label align="left" width="170" text="DEX Save" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sv_dex_prof" text=""/>
-            <checkBox align="left" width="60" field="sv_dex_exp" text=""/>
-            <edit align="left" width="70" field="sv_dex_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sv_dex_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("DEX Save", sheet.sv_dex_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="170" text="CON Save" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sv_con_prof" text=""/>
-            <checkBox align="left" width="60" field="sv_con_exp" text=""/>
-            <edit align="left" width="70" field="sv_con_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sv_con_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("CON Save", sheet.sv_con_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="170" text="INT Save" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sv_int_prof" text=""/>
-            <checkBox align="left" width="60" field="sv_int_exp" text=""/>
-            <edit align="left" width="70" field="sv_int_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sv_int_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("INT Save", sheet.sv_int_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="170" text="WIS Save" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sv_wis_prof" text=""/>
-            <checkBox align="left" width="60" field="sv_wis_exp" text=""/>
-            <edit align="left" width="70" field="sv_wis_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sv_wis_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("WIS Save", sheet.sv_wis_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="170" text="CHA Save" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sv_cha_prof" text=""/>
-            <checkBox align="left" width="60" field="sv_cha_exp" text=""/>
-            <edit align="left" width="70" field="sv_cha_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sv_cha_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("CHA Save", sheet.sv_cha_total_num); ]]></event></button>
-          </layout>
-
-          <!-- ===== SKILLS / INICIATIVA ===== -->
-          <layout align="top" height="12"/>
-          <layout align="top" height="26">
-            <label align="client" text="SKILLS / INICIATIVA" fontColor="#EDEDED" fontSize="15"/>
-          </layout>
-
-          <layout align="top" height="24">
-            <label align="left" width="240" text="Skill" fontColor="#CCCCCC"/>
-            <label align="left" width="60" text="Prof" fontColor="#CCCCCC"/>
-            <label align="left" width="60" text="Exp" fontColor="#CCCCCC"/>
-            <label align="left" width="70" text="Misc" fontColor="#CCCCCC"/>
-            <label align="left" width="90" text="Total" fontColor="#CCCCCC"/>
-            <label align="client" text="" fontColor="#CCCCCC"/>
-          </layout>
-
-          <!-- Initiative (DEX) -->
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Initiative (DEX)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_initiative_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_initiative_exp" text=""/>
-            <edit align="left" width="70" field="sk_initiative_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_initiative_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Initiative", sheet.sk_initiative_total_num); ]]></event></button>
-          </layout>
-
-          <!-- Skills (mesmo bloco que você já tinha) -->
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Athletics (STR)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_athletics_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_athletics_exp" text=""/>
-            <edit align="left" width="70" field="sk_athletics_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_athletics_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Athletics", sheet.sk_athletics_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Acrobatics (DEX)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_acrobatics_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_acrobatics_exp" text=""/>
-            <edit align="left" width="70" field="sk_acrobatics_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_acrobatics_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Acrobatics", sheet.sk_acrobatics_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Sleight of Hand (DEX)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_sleight_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_sleight_exp" text=""/>
-            <edit align="left" width="70" field="sk_sleight_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_sleight_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Sleight of Hand", sheet.sk_sleight_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Stealth (DEX)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_stealth_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_stealth_exp" text=""/>
-            <edit align="left" width="70" field="sk_stealth_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_stealth_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Stealth", sheet.sk_stealth_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Arcana (INT)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_arcana_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_arcana_exp" text=""/>
-            <edit align="left" width="70" field="sk_arcana_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_arcana_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Arcana", sheet.sk_arcana_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="History (INT)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_history_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_history_exp" text=""/>
-            <edit align="left" width="70" field="sk_history_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_history_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("History", sheet.sk_history_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Investigation (INT)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_investigation_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_investigation_exp" text=""/>
-            <edit align="left" width="70" field="sk_investigation_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_investigation_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Investigation", sheet.sk_investigation_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Nature (INT)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_nature_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_nature_exp" text=""/>
-            <edit align="left" width="70" field="sk_nature_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_nature_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Nature", sheet.sk_nature_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Religion (INT)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_religion_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_religion_exp" text=""/>
-            <edit align="left" width="70" field="sk_religion_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_religion_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Religion", sheet.sk_religion_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Animal Handling (WIS)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_animal_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_animal_exp" text=""/>
-            <edit align="left" width="70" field="sk_animal_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_animal_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Animal Handling", sheet.sk_animal_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Insight (WIS)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_insight_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_insight_exp" text=""/>
-            <edit align="left" width="70" field="sk_insight_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_insight_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Insight", sheet.sk_insight_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Medicine (WIS)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_medicine_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_medicine_exp" text=""/>
-            <edit align="left" width="70" field="sk_medicine_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_medicine_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Medicine", sheet.sk_medicine_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Perception (WIS)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_perception_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_perception_exp" text=""/>
-            <edit align="left" width="70" field="sk_perception_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_perception_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Perception", sheet.sk_perception_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Survival (WIS)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_survival_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_survival_exp" text=""/>
-            <edit align="left" width="70" field="sk_survival_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_survival_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Survival", sheet.sk_survival_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Deception (CHA)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_deception_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_deception_exp" text=""/>
-            <edit align="left" width="70" field="sk_deception_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_deception_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Deception", sheet.sk_deception_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Intimidation (CHA)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_intimidation_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_intimidation_exp" text=""/>
-            <edit align="left" width="70" field="sk_intimidation_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_intimidation_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Intimidation", sheet.sk_intimidation_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Performance (CHA)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_performance_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_performance_exp" text=""/>
-            <edit align="left" width="70" field="sk_performance_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_performance_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Performance", sheet.sk_performance_total_num); ]]></event></button>
-          </layout>
-
-          <layout align="top" height="28">
-            <label align="left" width="240" text="Persuasion (CHA)" fontColor="#FFFFFF"/>
-            <checkBox align="left" width="60" field="sk_persuasion_prof" text=""/>
-            <checkBox align="left" width="60" field="sk_persuasion_exp" text=""/>
-            <edit align="left" width="70" field="sk_persuasion_misc" type="number" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <edit align="left" width="90" field="sk_persuasion_total" readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
-            <button align="client" text="Roll"><event name="onClick"><![CDATA[ rollBonus("Persuasion", sheet.sk_persuasion_total_num); ]]></event></button>
-          </layout>
-
-          <!-- ===== CÁLCULOS ===== -->
-
-          <!-- CR -> PB -->
-          <dataLink field="cr"><event name="onChange"><![CDATA[
-            local function parseCR(cr)
-              local s = tostring(cr or ""):gsub("%s+","")
-              if s == "" then return 0 end
-              if s == "1/8" then return 0.125 end
-              if s == "1/4" then return 0.25 end
-              if s == "1/2" then return 0.5 end
-              local n = tonumber(s); if n ~= nil then return n end
-              return 0
-            end
-            local function clamp(n,a,b) if n<a then return a elseif n>b then return b else return n end end
-
-            local crVal = parseCR(sheet.cr)
-            local pb = 2 + math.floor((crVal + 3)/4)
-            pb = clamp(pb, 2, 9)
-
-            sheet.prof_bonus_num = pb
-            sheet.prof_bonus = __signed(pb)
-
-            sheet.forca = sheet.forca
-            sheet.destreza = sheet.destreza
-            sheet.constituicao = sheet.constituicao
-            sheet.inteligencia = sheet.inteligencia
-            sheet.sabedoria = sheet.sabedoria
-            sheet.carisma = sheet.carisma
-          ]]></event></dataLink>
-
-          <!-- Vida % -->
-          <dataLink field="hp_max"><event name="onChange"><![CDATA[ sheet.hp_atual = sheet.hp_atual ]]></event></dataLink>
-          <dataLink field="hp_atual"><event name="onChange"><![CDATA[
-            local maxv = __num(sheet.hp_max)
-            local curv = __num(sheet.hp_atual)
-
-            if maxv <= 0 then
-              sheet.hp_pct = 0
-              sheet.hp_pct_txt = "0"
-              return
-            end
-
-            local pct = math.floor((curv / maxv) * 100 + 0.5)
-            if pct < 0 then pct = 0 end
-            if pct > 100 then pct = 100 end
-
-            sheet.hp_pct = pct
-            sheet.hp_pct_txt = tostring(pct)
-          ]]></event></dataLink>
-
-          <!-- STR -->
-          <dataLink field="forca"><event name="onChange"><![CDATA[
-            local pb = __num(sheet.prof_bonus_num)
-            local m = __mod(sheet.forca)
-            sheet.mod_forca_num = m
-            sheet.mod_forca = __signed(m)
-
-            -- STR Save
-            local sv = m + __profBonus("sv_str_prof","sv_str_exp") + __num(sheet.sv_str_misc)
-            sheet.sv_str_total_num = sv
-            sheet.sv_str_total = __signed(sv)
-
-            -- Athletics
-            local t = m + __profBonus("sk_athletics_prof","sk_athletics_exp") + __num(sheet.sk_athletics_misc)
-            sheet.sk_athletics_total_num = t
-            sheet.sk_athletics_total = __signed(t)
-          ]]></event></dataLink>
-
-          <!-- DEX -->
-          <dataLink field="destreza"><event name="onChange"><![CDATA[
-            local m = __mod(sheet.destreza)
-            sheet.mod_destreza_num = m
-            sheet.mod_destreza = __signed(m)
-
-            -- DEX Save
-            local sv = m + __profBonus("sv_dex_prof","sv_dex_exp") + __num(sheet.sv_dex_misc)
-            sheet.sv_dex_total_num = sv
-            sheet.sv_dex_total = __signed(sv)
-
-            -- Initiative
-            local t
-            t = m + __profBonus("sk_initiative_prof","sk_initiative_exp") + __num(sheet.sk_initiative_misc)
-            sheet.sk_initiative_total_num = t
-            sheet.sk_initiative_total = __signed(t)
-
-            -- Acrobatics
-            t = m + __profBonus("sk_acrobatics_prof","sk_acrobatics_exp") + __num(sheet.sk_acrobatics_misc)
-            sheet.sk_acrobatics_total_num = t
-            sheet.sk_acrobatics_total = __signed(t)
-
-            -- Sleight
-            t = m + __profBonus("sk_sleight_prof","sk_sleight_exp") + __num(sheet.sk_sleight_misc)
-            sheet.sk_sleight_total_num = t
-            sheet.sk_sleight_total = __signed(t)
-
-            -- Stealth
-            t = m + __profBonus("sk_stealth_prof","sk_stealth_exp") + __num(sheet.sk_stealth_misc)
-            sheet.sk_stealth_total_num = t
-            sheet.sk_stealth_total = __signed(t)
-          ]]></event></dataLink>
-
-          <!-- CON -->
-          <dataLink field="constituicao"><event name="onChange"><![CDATA[
-            local m = __mod(sheet.constituicao)
-            sheet.mod_constituicao_num = m
-            sheet.mod_constituicao = __signed(m)
-
-            -- CON Save
-            local sv = m + __profBonus("sv_con_prof","sv_con_exp") + __num(sheet.sv_con_misc)
-            sheet.sv_con_total_num = sv
-            sheet.sv_con_total = __signed(sv)
-          ]]></event></dataLink>
-
-          <!-- INT -->
-          <dataLink field="inteligencia"><event name="onChange"><![CDATA[
-            local m = __mod(sheet.inteligencia)
-            sheet.mod_inteligencia_num = m
-            sheet.mod_inteligencia = __signed(m)
-
-            -- INT Save
-            local sv = m + __profBonus("sv_int_prof","sv_int_exp") + __num(sheet.sv_int_misc)
-            sheet.sv_int_total_num = sv
-            sheet.sv_int_total = __signed(sv)
-
-            local t
-            t = m + __profBonus("sk_arcana_prof","sk_arcana_exp") + __num(sheet.sk_arcana_misc)
-            sheet.sk_arcana_total_num = t
-            sheet.sk_arcana_total = __signed(t)
-
-            t = m + __profBonus("sk_history_prof","sk_history_exp") + __num(sheet.sk_history_misc)
-            sheet.sk_history_total_num = t
-            sheet.sk_history_total = __signed(t)
-
-            t = m + __profBonus("sk_investigation_prof","sk_investigation_exp") + __num(sheet.sk_investigation_misc)
-            sheet.sk_investigation_total_num = t
-            sheet.sk_investigation_total = __signed(t)
-
-            t = m + __profBonus("sk_nature_prof","sk_nature_exp") + __num(sheet.sk_nature_misc)
-            sheet.sk_nature_total_num = t
-            sheet.sk_nature_total = __signed(t)
-
-            t = m + __profBonus("sk_religion_prof","sk_religion_exp") + __num(sheet.sk_religion_misc)
-            sheet.sk_religion_total_num = t
-            sheet.sk_religion_total = __signed(t)
-          ]]></event></dataLink>
-
-          <!-- WIS -->
-          <dataLink field="sabedoria"><event name="onChange"><![CDATA[
-            local m = __mod(sheet.sabedoria)
-            sheet.mod_sabedoria_num = m
-            sheet.mod_sabedoria = __signed(m)
-
-            -- WIS Save
-            local sv = m + __profBonus("sv_wis_prof","sv_wis_exp") + __num(sheet.sv_wis_misc)
-            sheet.sv_wis_total_num = sv
-            sheet.sv_wis_total = __signed(sv)
-
-            local t
-            t = m + __profBonus("sk_animal_prof","sk_animal_exp") + __num(sheet.sk_animal_misc)
-            sheet.sk_animal_total_num = t
-            sheet.sk_animal_total = __signed(t)
-
-            t = m + __profBonus("sk_insight_prof","sk_insight_exp") + __num(sheet.sk_insight_misc)
-            sheet.sk_insight_total_num = t
-            sheet.sk_insight_total = __signed(t)
-
-            t = m + __profBonus("sk_medicine_prof","sk_medicine_exp") + __num(sheet.sk_medicine_misc)
-            sheet.sk_medicine_total_num = t
-            sheet.sk_medicine_total = __signed(t)
-
-            t = m + __profBonus("sk_perception_prof","sk_perception_exp") + __num(sheet.sk_perception_misc)
-            sheet.sk_perception_total_num = t
-            sheet.sk_perception_total = __signed(t)
-
-            t = m + __profBonus("sk_survival_prof","sk_survival_exp") + __num(sheet.sk_survival_misc)
-            sheet.sk_survival_total_num = t
-            sheet.sk_survival_total = __signed(t)
-          ]]></event></dataLink>
-
-          <!-- CHA -->
-          <dataLink field="carisma"><event name="onChange"><![CDATA[
-            local m = __mod(sheet.carisma)
-            sheet.mod_carisma_num = m
-            sheet.mod_carisma = __signed(m)
-
-            -- CHA Save
-            local sv = m + __profBonus("sv_cha_prof","sv_cha_exp") + __num(sheet.sv_cha_misc)
-            sheet.sv_cha_total_num = sv
-            sheet.sv_cha_total = __signed(sv)
-
-            local t
-            t = m + __profBonus("sk_deception_prof","sk_deception_exp") + __num(sheet.sk_deception_misc)
-            sheet.sk_deception_total_num = t
-            sheet.sk_deception_total = __signed(t)
-
-            t = m + __profBonus("sk_intimidation_prof","sk_intimidation_exp") + __num(sheet.sk_intimidation_misc)
-            sheet.sk_intimidation_total_num = t
-            sheet.sk_intimidation_total = __signed(t)
-
-            t = m + __profBonus("sk_performance_prof","sk_performance_exp") + __num(sheet.sk_performance_misc)
-            sheet.sk_performance_total_num = t
-            sheet.sk_performance_total = __signed(t)
-
-            t = m + __profBonus("sk_persuasion_prof","sk_persuasion_exp") + __num(sheet.sk_persuasion_misc)
-            sheet.sk_persuasion_total_num = t
-            sheet.sk_persuasion_total = __signed(t)
-          ]]></event></dataLink>
-
-          <!-- Recalcula ao mudar saves -->
-          <dataLink field="sv_str_prof"><event name="onChange"><![CDATA[ sheet.forca = sheet.forca ]]></event></dataLink>
-          <dataLink field="sv_str_exp"><event name="onChange"><![CDATA[ sheet.forca = sheet.forca ]]></event></dataLink>
-          <dataLink field="sv_str_misc"><event name="onChange"><![CDATA[ sheet.forca = sheet.forca ]]></event></dataLink>
-
-          <dataLink field="sv_dex_prof"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sv_dex_exp"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sv_dex_misc"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-
-          <dataLink field="sv_con_prof"><event name="onChange"><![CDATA[ sheet.constituicao = sheet.constituicao ]]></event></dataLink>
-          <dataLink field="sv_con_exp"><event name="onChange"><![CDATA[ sheet.constituicao = sheet.constituicao ]]></event></dataLink>
-          <dataLink field="sv_con_misc"><event name="onChange"><![CDATA[ sheet.constituicao = sheet.constituicao ]]></event></dataLink>
-
-          <dataLink field="sv_int_prof"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sv_int_exp"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sv_int_misc"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-
-          <dataLink field="sv_wis_prof"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sv_wis_exp"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sv_wis_misc"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-
-          <dataLink field="sv_cha_prof"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sv_cha_exp"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sv_cha_misc"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-
-          <!-- Recalcula ao mudar skills / iniciativa -->
-          <dataLink field="sk_initiative_prof"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_initiative_exp"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_initiative_misc"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-
-          <dataLink field="sk_athletics_prof"><event name="onChange"><![CDATA[ sheet.forca = sheet.forca ]]></event></dataLink>
-          <dataLink field="sk_athletics_exp"><event name="onChange"><![CDATA[ sheet.forca = sheet.forca ]]></event></dataLink>
-          <dataLink field="sk_athletics_misc"><event name="onChange"><![CDATA[ sheet.forca = sheet.forca ]]></event></dataLink>
-
-          <dataLink field="sk_acrobatics_prof"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_acrobatics_exp"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_acrobatics_misc"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-
-          <dataLink field="sk_sleight_prof"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_sleight_exp"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_sleight_misc"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-
-          <dataLink field="sk_stealth_prof"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_stealth_exp"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-          <dataLink field="sk_stealth_misc"><event name="onChange"><![CDATA[ sheet.destreza = sheet.destreza ]]></event></dataLink>
-
-          <dataLink field="sk_arcana_prof"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_arcana_exp"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_arcana_misc"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-
-          <dataLink field="sk_history_prof"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_history_exp"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_history_misc"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-
-          <dataLink field="sk_investigation_prof"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_investigation_exp"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_investigation_misc"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-
-          <dataLink field="sk_nature_prof"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_nature_exp"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_nature_misc"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-
-          <dataLink field="sk_religion_prof"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_religion_exp"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-          <dataLink field="sk_religion_misc"><event name="onChange"><![CDATA[ sheet.inteligencia = sheet.inteligencia ]]></event></dataLink>
-
-          <dataLink field="sk_animal_prof"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_animal_exp"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_animal_misc"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-
-          <dataLink field="sk_insight_prof"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_insight_exp"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_insight_misc"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-
-          <dataLink field="sk_medicine_prof"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_medicine_exp"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_medicine_misc"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-
-          <dataLink field="sk_perception_prof"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_perception_exp"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_perception_misc"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-
-          <dataLink field="sk_survival_prof"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_survival_exp"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-          <dataLink field="sk_survival_misc"><event name="onChange"><![CDATA[ sheet.sabedoria = sheet.sabedoria ]]></event></dataLink>
-
-          <dataLink field="sk_deception_prof"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_deception_exp"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_deception_misc"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-
-          <dataLink field="sk_intimidation_prof"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_intimidation_exp"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_intimidation_misc"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-
-          <dataLink field="sk_performance_prof"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_performance_exp"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_performance_misc"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-
-          <dataLink field="sk_persuasion_prof"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_persuasion_exp"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
-          <dataLink field="sk_persuasion_misc"><event name="onChange"><![CDATA[ sheet.carisma = sheet.carisma ]]></event></dataLink>
+          <!-- Lista de ataques (ela cresce internamente; o scrollBox rola a página inteira) -->
+          <recordList name="rclAttacks" field="attacks" align="client" layout="vertical">
+            <layout height="92" width="9999">
+              <rectangle align="client" color="#000000" opacity="0.22" xradius="6" yradius="6"/>
+
+              <layout align="top" height="34">
+                <edit  left="10"  top="6" width="220" height="24" field="name" fontColor="#FFFFFF"/>
+                <edit  left="240" top="6" width="70"  height="24" field="toHit" horzTextAlign="center" fontColor="#FFFFFF"/>
+                <edit  left="320" top="6" width="160" height="24" field="damage" fontColor="#FFFFFF"/>
+                <edit  left="490" top="6" width="120" height="24" field="dmgType" fontColor="#FFFFFF"/>
+
+                <button left="620" top="6" width="90" height="24" text="ROLAR">
+           <event name="onClick"><![CDATA[
+  local n = self:getNodeObject();
+  rollAttack(n, n);
+]]></event>
+                </button>
+
+                <button left="720" top="6" width="90" height="24" text="Excluir">
+                <event name="onClick"><![CDATA[
+  deleteAttack(self:getNodeObject());
+]]></event>
+                </button>
+              </layout>
+
+              <layout align="top" height="34">
+                <label left="10" top="6" width="60" height="24" text="Notas:" fontColor="#CCCCCC"/>
+                <edit  left="70" top="6" width="740" height="24" field="notes" fontColor="#FFFFFF"/>
+              </layout>
+            </layout>
+          </recordList>
 
         </layout>
       </layout>
+
+      <layout align="top" height="20"/>
+
+      <!-- =========================
+           AÇÕES LENDÁRIAS (mais embaixo)
+           ========================= -->
+      <layout align="top" height="28">
+        <label align="client" text="Ações Lendárias" fontColor="#FFFFFF" fontSize="14"/>
+      </layout>
+
+      <layout align="top" height="260">
+        <textEditor align="client" field="acoes_lendarias_texto" fontColor="#FFFFFF"/>
+      </layout>
+
+      <layout align="top" height="20"/>
 
     </layout>
   </scrollBox>
+</tab>
+  </tabControl>
 </form>

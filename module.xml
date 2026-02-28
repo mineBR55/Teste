@@ -3,9 +3,21 @@
   <id>br.com.mineBR55.mob</id>
   <version>1.0</version>
 
+  <settings>
+    <automaticStringLocalization>false</automaticStringLocalization>
+  </settings>
+
   <info lang="pt-BR">
     <name>Ficha Monstro DnD</name>
     <description>Plugin de ficha de monstro (SDK3)</description>
+    <author>mineBR55</author>
+    <site>https://github.com/mineBR55/Teste</site>
+    <contact>minebr55@gmail.com</contact>
+  </info>
+
+  <info lang="en">
+    <name>D&amp;D Monster Sheet</name>
+    <description>Monster sheet plugin (SDK3)</description>
     <author>mineBR55</author>
     <site>https://github.com/mineBR55/Teste</site>
     <contact>minebr55@gmail.com</contact>

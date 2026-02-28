@@ -1,7 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form name="frmTraits">
-  <layout align="top" height="30">
-    <label text="Traços" left="10" top="5" width="60" height="20"/>
-    <edit field="nomeTraits" left="70" top="3" width="300" height="25"/>
-  </layout>
+<form name="frmMobTraits"
+      formType="undefined"
+      title="Traits / Extras">
+
+  <scrollBox align="client">
+    <layout align="top" height="1200">
+
+      <rectangle align="client" color="#3A3A3A"/>
+
+      <layout align="top" height="40">
+        <label align="client" text="TRAITS / EXTRAS" fontColor="#EDEDED" fontSize="16"/>
+      </layout>
+
+      <layout align="top" height="10"/>
+
+      <layout align="top" height="28">
+        <label align="client" text="Traits" fontColor="#FFFFFF" fontSize="14"/>
+      </layout>
+
+      <layout align="top" height="150">
+        <textEditor align="client" field="traits_texto" fontColor="#FFFFFF"/>
+      </layout>
+
+      <layout align="top" height="16"/>
+
+      <layout align="top" height="28">
+        <label align="client" text="Resistências / Imunidades" fontColor="#FFFFFF" fontSize="14"/>
+      </layout>
+
+      <layout align="top" height="120">
+        <textEditor align="client" field="resist_imune_texto" fontColor="#FFFFFF"/>
+      </layout>
+
+      <layout align="top" height="16"/>
+
+      <layout align="top" height="28">
+        <label align="client" text="Idiomas / Observações" fontColor="#FFFFFF" fontSize="14"/>
+      </layout>
+
+      <layout align="top" height="120">
+        <textEditor align="client" field="idiomas_obs_texto" fontColor="#FFFFFF"/>
+      </layout>
+
+    </layout>
+  </scrollBox>
 </form>

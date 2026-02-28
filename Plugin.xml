@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="br.com.mineBR55.mob"
-        name="Mob Sheet"
-        version="1.0"
-        author="MineBR55"
-        sdkVersion="3.0">
-
-    <description>Ficha personalizada de Mob</description>
-
-    <sheets>
-        <sheetTemplate
-            sheetType="br.com.mineBR55.mob"
-            form="frmMob"
-            file="mob.lfm"/>
-    </sheets>
-
-    <forms>
-        <form name="frmMob" file="mob.lfm"/>
-        <form name="frmAction" file="action.lfm"/>
-    </forms>
-
-    <scripts>
-        <script file="mob.lua"/>
-        <script file="action.lua"/>
-    </scripts>
-
+<plugin>
+  <id>br.com.mineBR55.mob</id>
+  <name>Ficha Monstro DnD</name>
+  <description>Ficha personalizada de Mob (SDK3)</description>
+  <author>mineBR55</author>
+  <site>https://github.com/mineBR55/Teste</site>
+  <contact>minebr55@gmail.com</contact>
 </plugin>
