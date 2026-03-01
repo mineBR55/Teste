@@ -7,7 +7,7 @@
   <script><![CDATA[
     require("firecast.lua");
     require("ndb.lua");
-    
+
     local function num(v)
       local n = tonumber(v)
       return n or 0
@@ -42,34 +42,40 @@
     end
 
     function rollBonus(title, bonus)
+      if sheet == nil then return end
       local mesa = Firecast.getMesaDe(sheet)
-      if mesa ~= nil then
+      if mesa ~= nil and mesa.chat ~= nil then
         mesa.chat:rolarDados(Firecast.interpretarRolagem(buildD20(bonus)), title)
       end
     end
 
-    -- Proficiência com expertise:
-    -- Exp marcada => +pb*2
-    -- Senão Prof marcada => +pb
     function profBonus(profField, expField)
+      if sheet == nil then return 0 end
       local pb = num(sheet.prof_bonus_num)
-      if isChecked(sheet[expField]) then return pb * 2 end
+
+      if isChecked(sheet[expField]) then
+        -- expertise força prof (modelo DnD5e)
+        if sheet[profField] ~= true then sheet[profField] = true end
+        return pb * 2
+      end
+
       if isChecked(sheet[profField]) then return pb end
       return 0
     end
 
     function resolveExpr(expr)
       expr = tostring(expr or "")
+      if sheet == nil then return expr end
       local pb = num(sheet.prof_bonus_num)
 
       local map = {
-        ["STR"] = num(sheet.mod_forca_num),
-        ["DEX"] = num(sheet.mod_destreza_num),
-        ["CON"] = num(sheet.mod_constituicao_num),
-        ["INT"] = num(sheet.mod_inteligencia_num),
-        ["WIS"] = num(sheet.mod_sabedoria_num),
-        ["CHA"] = num(sheet.mod_carisma_num),
-        ["PB"]  = pb
+        STR = num(sheet.mod_forca_num),
+        DEX = num(sheet.mod_destreza_num),
+        CON = num(sheet.mod_constituicao_num),
+        INT = num(sheet.mod_inteligencia_num),
+        WIS = num(sheet.mod_sabedoria_num),
+        CHA = num(sheet.mod_carisma_num),
+        PB  = pb
       }
 
       for k, v in pairs(map) do
@@ -80,29 +86,38 @@
     end
 
     function rollExpr(title, expr)
+      if sheet == nil then return end
       local mesa = Firecast.getMesaDe(sheet)
-      if mesa ~= nil then
+      if mesa ~= nil and mesa.chat ~= nil then
         local resolved = resolveExpr(expr)
         mesa.chat:rolarDados(Firecast.interpretarRolagem(resolved), title .. " (" .. resolved .. ")")
       end
     end
-    function recalcAll()
-  sheet.forca = sheet.forca
-  sheet.destreza = sheet.destreza
-  sheet.constituicao = sheet.constituicao
-  sheet.inteligencia = sheet.inteligencia
-  sheet.sabedoria = sheet.sabedoria
-  sheet.carisma = sheet.carisma
 
-  sheet.hp_atual = sheet.hp_atual
-end
+    function recalcAll()
+      if sheet == nil then return end
+
+      -- “cutuca” campos pra forçar refresh
+      sheet.forca = sheet.forca
+      sheet.destreza = sheet.destreza
+      sheet.constituicao = sheet.constituicao
+      sheet.inteligencia = sheet.inteligencia
+      sheet.sabedoria = sheet.sabedoria
+      sheet.carisma = sheet.carisma
+      sheet.cr = sheet.cr
+    end
+
     _G.__num = num
     _G.__mod = mod
     _G.__signed = signed
     _G.__profBonus = profBonus
     _G.__clamp = clamp
-
   ]]></script>
+
+  <!-- ✅ SEM CDATA AQUI -->
+  <event name="onShow">
+    if recalcAll ~= nil then recalcAll(); end
+  </event>
 
   <tabControl align="client">
 
@@ -119,8 +134,8 @@ end
             <layout align="client">
 
               <!-- ===== CAIXA: IDENTIDADE ===== -->
-<layout align="top" height="130">
-  <!-- fundo da caixinha (enabled=false pra NÃO bloquear cliques) -->
+<layout align="top" height="160">
+  <!-- fundo da caixinha -->
   <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
@@ -142,14 +157,23 @@ end
       <edit  left="485" top="3" width="250" height="24" field="tipo" fontColor="#FFFFFF"/>
     </layout>
 
-    <!-- Linha 2: Tamanho + Alinhamento -->
+    <!-- Linha 2: Tamanho + Alinhamento + CR + PB -->
     <layout align="top" height="30">
       <label left="14" top="6" width="70" height="20" text="Tamanho" fontColor="#CCCCCC"/>
-      <edit  left="80" top="3" width="160" height="24" field="tamanho" fontColor="#FFFFFF"/>
+      <edit  left="80" top="3" width="140" height="24" field="tamanho" fontColor="#FFFFFF"/>
 
-      <label left="260" top="6" width="90" height="20" text="Alinh." fontColor="#CCCCCC"/>
-      <edit  left="310" top="3" width="220" height="24" field="alinhamento" fontColor="#FFFFFF"/>
+      <label left="230" top="6" width="80" height="20" text="Alinh." fontColor="#CCCCCC"/>
+      <edit  left="280" top="3" width="150" height="24" field="alinhamento" fontColor="#FFFFFF"/>
+
+      <label left="440" top="6" width="30" height="20" text="CR" fontColor="#CCCCCC"/>
+      <edit  left="470" top="3" width="60" height="24" field="cr"
+             horzTextAlign="center" fontColor="#FFFFFF"/>
+
+      <label left="540" top="6" width="30" height="20" text="PB" fontColor="#CCCCCC"/>
+      <edit  left="570" top="3" width="60" height="24" field="prof_bonus"
+             horzTextAlign="center" fontColor="#FFFFFF" enabled="false"/>
     </layout>
+
   </layout>
 </layout>
 
@@ -854,337 +878,124 @@ end
               <!-- ===================== CÁLCULOS ===================== -->
 
               <!-- CR -> PB (tabela oficial 5e) -->
+<!-- ===================== CÁLCULOS ===================== -->
+
+<!-- Recalc ao mudar CR -->
 <dataLink field="cr">
   <event name="onChange"><![CDATA[
-    local function parseCR(cr)
-      local s = tostring(cr or ""):gsub("%s+","")
-      if s == "" then return 0 end
-      if s == "1/8" then return 0.125 end
-      if s == "1/4" then return 0.25 end
-      if s == "1/2" then return 0.5 end
-      local n = tonumber(s); if n ~= nil then return n end
-      return 0
-    end
-
-    local function pbFromCR(crVal)
-      -- 5e: CR 0–4 => +2; 5–8 => +3; 9–12 => +4; 13–16 => +5; 17–20 => +6; 21–24 => +7; 25–28 => +8; 29–30 => +9
-      if crVal < 5 then return 2 end
-      if crVal < 9 then return 3 end
-      if crVal < 13 then return 4 end
-      if crVal < 17 then return 5 end
-      if crVal < 21 then return 6 end
-      if crVal < 25 then return 7 end
-      if crVal < 29 then return 8 end
-      return 9
-    end
-
-    local crVal = parseCR(sheet.cr)
-    local pb = pbFromCR(crVal)
-
-    sheet.prof_bonus_num = pb
-    sheet.prof_bonus = __signed(pb)
-
-    -- força recálculo de tudo que depende do PB
-    if recalcAll ~= nil then
-      recalcAll()
-    else
-      sheet.forca = sheet.forca
-      sheet.destreza = sheet.destreza
-      sheet.constituicao = sheet.constituicao
-      sheet.inteligencia = sheet.inteligencia
-      sheet.sabedoria = sheet.sabedoria
-      sheet.carisma = sheet.carisma
-    end
+    if recalcAll ~= nil then recalcAll(); end
   ]]></event>
 </dataLink>
 
-              <!-- Vida % -->
-              <dataLink field="hp_max"><event name="onChange"><![CDATA[ sheet.hp_atual = sheet.hp_atual ]]></event></dataLink>
-              <dataLink field="hp_atual">
-                <event name="onChange"><![CDATA[
-                  local maxv = __num(sheet.hp_max)
-                  local curv = __num(sheet.hp_atual)
+<!-- Recalc ao mudar atributos base -->
+<dataLink field="forca"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="destreza"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="constituicao"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="inteligencia"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sabedoria"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="carisma"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  if maxv <= 0 then
-                    sheet.hp_pct = 0
-                    sheet.hp_pct_txt = "0"
-                    return
-                  end
+<!-- ===================== Recalc triggers: SAVES ===================== -->
+<dataLink field="sv_str_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_str_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_str_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local pct = math.floor((curv / maxv) * 100 + 0.5)
-                  if pct < 0 then pct = 0 end
-                  if pct > 100 then pct = 100 end
+<dataLink field="sv_dex_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_dex_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_dex_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  sheet.hp_pct = pct
-                  sheet.hp_pct_txt = tostring(pct)
-                ]]></event>
-              </dataLink>
+<dataLink field="sv_con_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_con_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_con_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-              <!-- STR -->
-              <dataLink field="forca">
-                <event name="onChange"><![CDATA[
-                  local m = __mod(sheet.forca)
-                  sheet.mod_forca_num = m
-                  sheet.mod_forca = __signed(m)
+<dataLink field="sv_int_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_int_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_int_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local sv = m + __profBonus("sv_str_prof","sv_str_exp") + __num(sheet.sv_str_misc)
-                  sheet.sv_str_total_num = sv
-                  sheet.sv_str_total = __signed(sv)
+<dataLink field="sv_wis_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_wis_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_wis_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local t = m + __profBonus("sk_athletics_prof","sk_athletics_exp") + __num(sheet.sk_athletics_misc)
-                  sheet.sk_athletics_total_num = t
-                  sheet.sk_athletics_total = __signed(t)
-                ]]></event>
-              </dataLink>
+<dataLink field="sv_cha_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_cha_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sv_cha_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-              <!-- DEX -->
-              <dataLink field="destreza">
-                <event name="onChange"><![CDATA[
-                  local m = __mod(sheet.destreza)
-                  sheet.mod_destreza_num = m
-                  sheet.mod_destreza = __signed(m)
+<!-- ===================== Recalc triggers: SKILLS ===================== -->
+<dataLink field="sk_initiative_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_initiative_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_initiative_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local sv = m + __profBonus("sv_dex_prof","sv_dex_exp") + __num(sheet.sv_dex_misc)
-                  sheet.sv_dex_total_num = sv
-                  sheet.sv_dex_total = __signed(sv)
+<dataLink field="sk_athletics_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_athletics_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_athletics_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local t
-                  t = m + __profBonus("sk_initiative_prof","sk_initiative_exp") + __num(sheet.sk_initiative_misc)
-                  sheet.sk_initiative_total_num = t
-                  sheet.sk_initiative_total = __signed(t)
+<dataLink field="sk_acrobatics_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_acrobatics_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_acrobatics_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_acrobatics_prof","sk_acrobatics_exp") + __num(sheet.sk_acrobatics_misc)
-                  sheet.sk_acrobatics_total_num = t
-                  sheet.sk_acrobatics_total = __signed(t)
+<dataLink field="sk_sleight_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_sleight_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_sleight_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_sleight_prof","sk_sleight_exp") + __num(sheet.sk_sleight_misc)
-                  sheet.sk_sleight_total_num = t
-                  sheet.sk_sleight_total = __signed(t)
+<dataLink field="sk_stealth_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_stealth_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_stealth_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_stealth_prof","sk_stealth_exp") + __num(sheet.sk_stealth_misc)
-                  sheet.sk_stealth_total_num = t
-                  sheet.sk_stealth_total = __signed(t)
-                ]]></event>
-              </dataLink>
+<dataLink field="sk_arcana_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_arcana_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_arcana_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-              <!-- CON -->
-              <dataLink field="constituicao">
-                <event name="onChange"><![CDATA[
-                  local m = __mod(sheet.constituicao)
-                  sheet.mod_constituicao_num = m
-                  sheet.mod_constituicao = __signed(m)
+<dataLink field="sk_history_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_history_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_history_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local sv = m + __profBonus("sv_con_prof","sv_con_exp") + __num(sheet.sv_con_misc)
-                  sheet.sv_con_total_num = sv
-                  sheet.sv_con_total = __signed(sv)
-                ]]></event>
-              </dataLink>
+<dataLink field="sk_investigation_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_investigation_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_investigation_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-              <!-- INT -->
-              <dataLink field="inteligencia">
-                <event name="onChange"><![CDATA[
-                  local m = __mod(sheet.inteligencia)
-                  sheet.mod_inteligencia_num = m
-                  sheet.mod_inteligencia = __signed(m)
+<dataLink field="sk_nature_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_nature_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_nature_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local sv = m + __profBonus("sv_int_prof","sv_int_exp") + __num(sheet.sv_int_misc)
-                  sheet.sv_int_total_num = sv
-                  sheet.sv_int_total = __signed(sv)
+<dataLink field="sk_religion_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_religion_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_religion_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local t
-                  t = m + __profBonus("sk_arcana_prof","sk_arcana_exp") + __num(sheet.sk_arcana_misc)
-                  sheet.sk_arcana_total_num = t
-                  sheet.sk_arcana_total = __signed(t)
+<dataLink field="sk_animal_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_animal_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_animal_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_history_prof","sk_history_exp") + __num(sheet.sk_history_misc)
-                  sheet.sk_history_total_num = t
-                  sheet.sk_history_total = __signed(t)
+<dataLink field="sk_insight_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_insight_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_insight_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_investigation_prof","sk_investigation_exp") + __num(sheet.sk_investigation_misc)
-                  sheet.sk_investigation_total_num = t
-                  sheet.sk_investigation_total = __signed(t)
+<dataLink field="sk_medicine_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_medicine_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_medicine_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_nature_prof","sk_nature_exp") + __num(sheet.sk_nature_misc)
-                  sheet.sk_nature_total_num = t
-                  sheet.sk_nature_total = __signed(t)
+<dataLink field="sk_perception_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_perception_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_perception_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_religion_prof","sk_religion_exp") + __num(sheet.sk_religion_misc)
-                  sheet.sk_religion_total_num = t
-                  sheet.sk_religion_total = __signed(t)
-                ]]></event>
-              </dataLink>
+<dataLink field="sk_survival_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_survival_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_survival_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-              <!-- WIS -->
-              <dataLink field="sabedoria">
-                <event name="onChange"><![CDATA[
-                  local m = __mod(sheet.sabedoria)
-                  sheet.mod_sabedoria_num = m
-                  sheet.mod_sabedoria = __signed(m)
+<dataLink field="sk_deception_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_deception_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_deception_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local sv = m + __profBonus("sv_wis_prof","sv_wis_exp") + __num(sheet.sv_wis_misc)
-                  sheet.sv_wis_total_num = sv
-                  sheet.sv_wis_total = __signed(sv)
+<dataLink field="sk_intimidation_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_intimidation_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_intimidation_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  local t
-                  t = m + __profBonus("sk_animal_prof","sk_animal_exp") + __num(sheet.sk_animal_misc)
-                  sheet.sk_animal_total_num = t
-                  sheet.sk_animal_total = __signed(t)
+<dataLink field="sk_performance_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_performance_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_performance_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
 
-                  t = m + __profBonus("sk_insight_prof","sk_insight_exp") + __num(sheet.sk_insight_misc)
-                  sheet.sk_insight_total_num = t
-                  sheet.sk_insight_total = __signed(t)
-
-                  t = m + __profBonus("sk_medicine_prof","sk_medicine_exp") + __num(sheet.sk_medicine_misc)
-                  sheet.sk_medicine_total_num = t
-                  sheet.sk_medicine_total = __signed(t)
-
-                  t = m + __profBonus("sk_perception_prof","sk_perception_exp") + __num(sheet.sk_perception_misc)
-                  sheet.sk_perception_total_num = t
-                  sheet.sk_perception_total = __signed(t)
-
-                  -- Passive Perception = 10 + Perception total
-                  local pp = 10 + t
-                  sheet.passive_perception_num = pp
-                  sheet.passive_perception = tostring(pp)
-
-                  t = m + __profBonus("sk_survival_prof","sk_survival_exp") + __num(sheet.sk_survival_misc)
-                  sheet.sk_survival_total_num = t
-                  sheet.sk_survival_total = __signed(t)
-                ]]></event>
-              </dataLink>
-
-              <!-- CHA -->
-              <dataLink field="carisma">
-                <event name="onChange"><![CDATA[
-                  local m = __mod(sheet.carisma)
-                  sheet.mod_carisma_num = m
-                  sheet.mod_carisma = __signed(m)
-
-                  local sv = m + __profBonus("sv_cha_prof","sv_cha_exp") + __num(sheet.sv_cha_misc)
-                  sheet.sv_cha_total_num = sv
-                  sheet.sv_cha_total = __signed(sv)
-
-                  local t
-                  t = m + __profBonus("sk_deception_prof","sk_deception_exp") + __num(sheet.sk_deception_misc)
-                  sheet.sk_deception_total_num = t
-                  sheet.sk_deception_total = __signed(t)
-
-                  t = m + __profBonus("sk_intimidation_prof","sk_intimidation_exp") + __num(sheet.sk_intimidation_misc)
-                  sheet.sk_intimidation_total_num = t
-                  sheet.sk_intimidation_total = __signed(t)
-
-                  t = m + __profBonus("sk_performance_prof","sk_performance_exp") + __num(sheet.sk_performance_misc)
-                  sheet.sk_performance_total_num = t
-                  sheet.sk_performance_total = __signed(t)
-
-                  t = m + __profBonus("sk_persuasion_prof","sk_persuasion_exp") + __num(sheet.sk_persuasion_misc)
-                  sheet.sk_persuasion_total_num = t
-                  sheet.sk_persuasion_total = __signed(t)
-                ]]></event>
-              </dataLink>
-
-              <!-- Recalc triggers: Saves -->
-              <!-- Recalc triggers (RESPONSIVO): Saves -->
-<dataLink field="sv_str_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_str_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_str_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sv_dex_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_dex_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_dex_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sv_con_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_con_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_con_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sv_int_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_int_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_int_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sv_wis_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_wis_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_wis_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sv_cha_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_cha_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sv_cha_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<!-- Recalc triggers (RESPONSIVO): Skills -->
-<dataLink field="sk_initiative_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_initiative_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_initiative_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_athletics_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_athletics_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_athletics_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_acrobatics_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_acrobatics_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_acrobatics_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_sleight_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_sleight_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_sleight_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_stealth_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_stealth_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_stealth_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_arcana_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_arcana_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_arcana_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_history_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_history_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_history_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_investigation_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_investigation_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_investigation_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_nature_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_nature_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_nature_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_religion_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_religion_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_religion_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_animal_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_animal_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_animal_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_insight_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_insight_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_insight_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_medicine_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_medicine_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_medicine_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_perception_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_perception_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_perception_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_survival_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_survival_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_survival_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_deception_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_deception_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_deception_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_intimidation_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_intimidation_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_intimidation_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_performance_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_performance_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_performance_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-
-<dataLink field="sk_persuasion_prof"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_persuasion_exp"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
-<dataLink field="sk_persuasion_misc"><event name="onChange"><![CDATA[ recalcAll(); ]]></event></dataLink>
+<dataLink field="sk_persuasion_prof"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_persuasion_exp"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
+<dataLink field="sk_persuasion_misc"><event name="onChange"><![CDATA[ if recalcAll ~= nil then recalcAll(); end ]]></event></dataLink>
             </layout>
           </layout>
 
