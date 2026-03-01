@@ -2,276 +2,109 @@
 <form name="frmMob"
       formType="sheetTemplate"
       dataType="br.com.mineBR55.mob"
-      title="Ficha Mob">
+      title="Ficha Monstro DnD 5e (Mob)">
 
   <script><![CDATA[
-    require("firecast.lua");
-    require("ndb.lua");
+  require("firecast.lua");
+  require("ndb.lua");
 
-    local function num(v)
-      local n = tonumber(v)
-      return n or 0
+  local function num(v)
+    local n = tonumber(v);
+    return n or 0;
+  end
+
+  local function isChecked(v)
+    return (v == true) or (v == "true") or (v == 1);
+  end
+
+  local function mod(score)
+    return math.floor((num(score) - 10) / 2);
+  end
+
+  function buildD20(bonus)
+    bonus = num(bonus);
+
+    if bonus >= 0 then
+      return "1d20 + " .. tostring(bonus);
+    else
+      return "1d20 - " .. tostring(math.abs(bonus));
+    end
+  end
+
+  function rollBonus(title, bonus)
+    if sheet == nil then return end
+
+    local mesa = Firecast.getMesaDe(sheet);
+    if mesa ~= nil and mesa.chat ~= nil then
+      mesa.chat:rolarDados(Firecast.interpretarRolagem(buildD20(bonus)), title);
+    end
+  end
+
+  function profBonus(profField, expField)
+    if sheet == nil then return 0 end
+
+    local pb = tonumber(sheet.prof_bonus_num) or 0;
+
+    if isChecked(sheet[expField]) then
+      if sheet[profField] ~= true then sheet[profField] = true end
+      return pb * 2;
     end
 
-    local function isChecked(v)
-      return (v == true) or (v == "true") or (v == 1)
+    if isChecked(sheet[profField]) then return pb end
+    return 0;
+  end
+
+  function resolveExpr(expr)
+    expr = tostring(expr or "");
+    if sheet == nil then return expr end
+
+    local pb = tonumber(sheet.prof_bonus_num) or 0;
+
+    local map = {
+      STR = tonumber(sheet.mod_forca_num) or 0,
+      DEX = tonumber(sheet.mod_destreza_num) or 0,
+      CON = tonumber(sheet.mod_constituicao_num) or 0,
+      INT = tonumber(sheet.mod_inteligencia_num) or 0,
+      WIS = tonumber(sheet.mod_sabedoria_num) or 0,
+      CHA = tonumber(sheet.mod_carisma_num) or 0,
+      PB  = pb
+    };
+
+    for k, v in pairs(map) do
+      expr = expr:gsub("%f[%w_]" .. k .. "%f[^%w_]", tostring(v));
     end
 
-    local function mod(score)
-      return math.floor((num(score) - 10) / 2)
+    return expr;
+  end
+
+  function rollExpr(title, expr)
+    if sheet == nil then return end
+
+    local mesa = Firecast.getMesaDe(sheet);
+    if mesa ~= nil and mesa.chat ~= nil then
+      local resolved = resolveExpr(expr);
+      mesa.chat:rolarDados(Firecast.interpretarRolagem(resolved), title .. " (" .. resolved .. ")");
+    end
+  end
+
+  function recalcAll()
+    if sheet == nil then return end
+    -- delega cálculo pesado para o Mob.lua (arquivo separado)
+    if _G ~= nil and _G.recalcAll ~= nil and _G.recalcAll ~= recalcAll then
+      _G.recalcAll();
+      return;
     end
 
-    local function signed(n)
-      n = num(n)
-      if n >= 0 then return "+" .. tostring(n) else return tostring(n) end
-    end
-
-    local function clamp(n, a, b)
-      if n < a then return a end
-      if n > b then return b end
-      return n
-    end
-
-    function buildD20(bonus)
-      bonus = num(bonus)
-      if bonus >= 0 then
-        return "1d20 + " .. tostring(bonus)
-      else
-        return "1d20 - " .. tostring(math.abs(bonus))
-      end
-    end
-
-    function rollBonus(title, bonus)
-      if sheet == nil then return end
-      local mesa = Firecast.getMesaDe(sheet)
-      if mesa ~= nil and mesa.chat ~= nil then
-        mesa.chat:rolarDados(Firecast.interpretarRolagem(buildD20(bonus)), title)
-      end
-    end
-
-    function profBonus(profField, expField)
-      if sheet == nil then return 0 end
-      local pb = num(sheet.prof_bonus_num)
-
-      if isChecked(sheet[expField]) then
-        -- expertise força prof (modelo DnD5e)
-        if sheet[profField] ~= true then sheet[profField] = true end
-        return pb * 2
-      end
-
-      if isChecked(sheet[profField]) then return pb end
-      return 0
-    end
-
-    function resolveExpr(expr)
-      expr = tostring(expr or "")
-      if sheet == nil then return expr end
-      local pb = num(sheet.prof_bonus_num)
-
-      local map = {
-        STR = num(sheet.mod_forca_num),
-        DEX = num(sheet.mod_destreza_num),
-        CON = num(sheet.mod_constituicao_num),
-        INT = num(sheet.mod_inteligencia_num),
-        WIS = num(sheet.mod_sabedoria_num),
-        CHA = num(sheet.mod_carisma_num),
-        PB  = pb
-      }
-
-      for k, v in pairs(map) do
-        expr = expr:gsub("%f[%w_]" .. k .. "%f[^%w_]", tostring(v))
-      end
-
-      return expr
-    end
-
-    function rollExpr(title, expr)
-      if sheet == nil then return end
-      local mesa = Firecast.getMesaDe(sheet)
-      if mesa ~= nil and mesa.chat ~= nil then
-        local resolved = resolveExpr(expr)
-        mesa.chat:rolarDados(Firecast.interpretarRolagem(resolved), title .. " (" .. resolved .. ")")
-      end
-    end
-
-    function recalcAll()
-      if sheet == nil then return end
-
-      local function parseCR(v)
-        local s = tostring(v or ""):gsub("%s+", "")
-        if s == "" then return 0 end
-        local a, b = s:match("^(%d+)%/(%d+)$")
-        if a and b then
-          local na, nb = tonumber(a), tonumber(b)
-          if na and nb and nb ~= 0 then return na / nb end
-        end
-        return tonumber(s) or 0
-      end
-
-      local function pbFromCR(cr)
-        if cr >= 29 then return 9 end
-        if cr >= 25 then return 8 end
-        if cr >= 21 then return 7 end
-        if cr >= 17 then return 6 end
-        if cr >= 13 then return 5 end
-        if cr >= 9  then return 4 end
-        if cr >= 5  then return 3 end
-        return 2
-      end
-
-      local function fmtBonus(n)
-        n = num(n)
-        if n >= 0 then return "+" .. tostring(n) end
-        return tostring(n)
-      end
-
-      local function forceProfIfExp(profField, expField)
-        if isChecked(sheet[expField]) and not isChecked(sheet[profField]) then
-          sheet[profField] = true
-        end
-      end
-
-      local function calcTotal(baseModNum, profField, expField, miscField)
-        local pb = num(sheet.prof_bonus_num)
-        local misc = num(sheet[miscField])
-        local add = 0
-        if isChecked(sheet[profField]) then add = add + pb end
-        if isChecked(sheet[expField])  then add = add + pb end
-        return num(baseModNum) + misc + add
-      end
-
-      local crVal = parseCR(sheet.cr)
-      local pb = pbFromCR(crVal)
-      sheet.prof_bonus_num = pb
-      sheet.prof_bonus = fmtBonus(pb)
-
-      sheet.mod_forca_num = mod(sheet.forca)
-      sheet.mod_forca = fmtBonus(sheet.mod_forca_num)
-
-      sheet.mod_destreza_num = mod(sheet.destreza)
-      sheet.mod_destreza = fmtBonus(sheet.mod_destreza_num)
-
-      sheet.mod_constituicao_num = mod(sheet.constituicao)
-      sheet.mod_constituicao = fmtBonus(sheet.mod_constituicao_num)
-
-      sheet.mod_inteligencia_num = mod(sheet.inteligencia)
-      sheet.mod_inteligencia = fmtBonus(sheet.mod_inteligencia_num)
-
-      sheet.mod_sabedoria_num = mod(sheet.sabedoria)
-      sheet.mod_sabedoria = fmtBonus(sheet.mod_sabedoria_num)
-
-      sheet.mod_carisma_num = mod(sheet.carisma)
-      sheet.mod_carisma = fmtBonus(sheet.mod_carisma_num)
-
-      forceProfIfExp("sv_str_prof", "sv_str_exp")
-      sheet.sv_str_total_num = calcTotal(sheet.mod_forca_num, "sv_str_prof", "sv_str_exp", "sv_str_misc")
-      sheet.sv_str_total = fmtBonus(sheet.sv_str_total_num)
-
-      forceProfIfExp("sv_dex_prof", "sv_dex_exp")
-      sheet.sv_dex_total_num = calcTotal(sheet.mod_destreza_num, "sv_dex_prof", "sv_dex_exp", "sv_dex_misc")
-      sheet.sv_dex_total = fmtBonus(sheet.sv_dex_total_num)
-
-      forceProfIfExp("sv_con_prof", "sv_con_exp")
-      sheet.sv_con_total_num = calcTotal(sheet.mod_constituicao_num, "sv_con_prof", "sv_con_exp", "sv_con_misc")
-      sheet.sv_con_total = fmtBonus(sheet.sv_con_total_num)
-
-      forceProfIfExp("sv_int_prof", "sv_int_exp")
-      sheet.sv_int_total_num = calcTotal(sheet.mod_inteligencia_num, "sv_int_prof", "sv_int_exp", "sv_int_misc")
-      sheet.sv_int_total = fmtBonus(sheet.sv_int_total_num)
-
-      forceProfIfExp("sv_wis_prof", "sv_wis_exp")
-      sheet.sv_wis_total_num = calcTotal(sheet.mod_sabedoria_num, "sv_wis_prof", "sv_wis_exp", "sv_wis_misc")
-      sheet.sv_wis_total = fmtBonus(sheet.sv_wis_total_num)
-
-      forceProfIfExp("sv_cha_prof", "sv_cha_exp")
-      sheet.sv_cha_total_num = calcTotal(sheet.mod_carisma_num, "sv_cha_prof", "sv_cha_exp", "sv_cha_misc")
-      sheet.sv_cha_total = fmtBonus(sheet.sv_cha_total_num)
-
-      forceProfIfExp("sk_initiative_prof", "sk_initiative_exp")
-      sheet.sk_initiative_total_num = calcTotal(sheet.mod_destreza_num, "sk_initiative_prof", "sk_initiative_exp", "sk_initiative_misc")
-      sheet.sk_initiative_total = fmtBonus(sheet.sk_initiative_total_num)
-
-      forceProfIfExp("sk_athletics_prof", "sk_athletics_exp")
-      sheet.sk_athletics_total_num = calcTotal(sheet.mod_forca_num, "sk_athletics_prof", "sk_athletics_exp", "sk_athletics_misc")
-      sheet.sk_athletics_total = fmtBonus(sheet.sk_athletics_total_num)
-
-      forceProfIfExp("sk_acrobatics_prof", "sk_acrobatics_exp")
-      sheet.sk_acrobatics_total_num = calcTotal(sheet.mod_destreza_num, "sk_acrobatics_prof", "sk_acrobatics_exp", "sk_acrobatics_misc")
-      sheet.sk_acrobatics_total = fmtBonus(sheet.sk_acrobatics_total_num)
-
-      forceProfIfExp("sk_sleight_prof", "sk_sleight_exp")
-      sheet.sk_sleight_total_num = calcTotal(sheet.mod_destreza_num, "sk_sleight_prof", "sk_sleight_exp", "sk_sleight_misc")
-      sheet.sk_sleight_total = fmtBonus(sheet.sk_sleight_total_num)
-
-      forceProfIfExp("sk_stealth_prof", "sk_stealth_exp")
-      sheet.sk_stealth_total_num = calcTotal(sheet.mod_destreza_num, "sk_stealth_prof", "sk_stealth_exp", "sk_stealth_misc")
-      sheet.sk_stealth_total = fmtBonus(sheet.sk_stealth_total_num)
-
-      forceProfIfExp("sk_arcana_prof", "sk_arcana_exp")
-      sheet.sk_arcana_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_arcana_prof", "sk_arcana_exp", "sk_arcana_misc")
-      sheet.sk_arcana_total = fmtBonus(sheet.sk_arcana_total_num)
-
-      forceProfIfExp("sk_history_prof", "sk_history_exp")
-      sheet.sk_history_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_history_prof", "sk_history_exp", "sk_history_misc")
-      sheet.sk_history_total = fmtBonus(sheet.sk_history_total_num)
-
-      forceProfIfExp("sk_investigation_prof", "sk_investigation_exp")
-      sheet.sk_investigation_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_investigation_prof", "sk_investigation_exp", "sk_investigation_misc")
-      sheet.sk_investigation_total = fmtBonus(sheet.sk_investigation_total_num)
-
-      forceProfIfExp("sk_nature_prof", "sk_nature_exp")
-      sheet.sk_nature_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_nature_prof", "sk_nature_exp", "sk_nature_misc")
-      sheet.sk_nature_total = fmtBonus(sheet.sk_nature_total_num)
-
-      forceProfIfExp("sk_religion_prof", "sk_religion_exp")
-      sheet.sk_religion_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_religion_prof", "sk_religion_exp", "sk_religion_misc")
-      sheet.sk_religion_total = fmtBonus(sheet.sk_religion_total_num)
-
-      forceProfIfExp("sk_animal_prof", "sk_animal_exp")
-      sheet.sk_animal_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_animal_prof", "sk_animal_exp", "sk_animal_misc")
-      sheet.sk_animal_total = fmtBonus(sheet.sk_animal_total_num)
-
-      forceProfIfExp("sk_insight_prof", "sk_insight_exp")
-      sheet.sk_insight_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_insight_prof", "sk_insight_exp", "sk_insight_misc")
-      sheet.sk_insight_total = fmtBonus(sheet.sk_insight_total_num)
-
-      forceProfIfExp("sk_medicine_prof", "sk_medicine_exp")
-      sheet.sk_medicine_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_medicine_prof", "sk_medicine_exp", "sk_medicine_misc")
-      sheet.sk_medicine_total = fmtBonus(sheet.sk_medicine_total_num)
-
-      forceProfIfExp("sk_perception_prof", "sk_perception_exp")
-      sheet.sk_perception_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_perception_prof", "sk_perception_exp", "sk_perception_misc")
-      sheet.sk_perception_total = fmtBonus(sheet.sk_perception_total_num)
-
-      forceProfIfExp("sk_survival_prof", "sk_survival_exp")
-      sheet.sk_survival_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_survival_prof", "sk_survival_exp", "sk_survival_misc")
-      sheet.sk_survival_total = fmtBonus(sheet.sk_survival_total_num)
-
-      forceProfIfExp("sk_deception_prof", "sk_deception_exp")
-      sheet.sk_deception_total_num = calcTotal(sheet.mod_carisma_num, "sk_deception_prof", "sk_deception_exp", "sk_deception_misc")
-      sheet.sk_deception_total = fmtBonus(sheet.sk_deception_total_num)
-
-      forceProfIfExp("sk_intimidation_prof", "sk_intimidation_exp")
-      sheet.sk_intimidation_total_num = calcTotal(sheet.mod_carisma_num, "sk_intimidation_prof", "sk_intimidation_exp", "sk_intimidation_misc")
-      sheet.sk_intimidation_total = fmtBonus(sheet.sk_intimidation_total_num)
-
-      forceProfIfExp("sk_performance_prof", "sk_performance_exp")
-      sheet.sk_performance_total_num = calcTotal(sheet.mod_carisma_num, "sk_performance_prof", "sk_performance_exp", "sk_performance_misc")
-      sheet.sk_performance_total = fmtBonus(sheet.sk_performance_total_num)
-
-      forceProfIfExp("sk_persuasion_prof", "sk_persuasion_exp")
-      sheet.sk_persuasion_total_num = calcTotal(sheet.mod_carisma_num, "sk_persuasion_prof", "sk_persuasion_exp", "sk_persuasion_misc")
-      sheet.sk_persuasion_total = fmtBonus(sheet.sk_persuasion_total_num)
-
-      sheet.percepcao_passiva = tostring(10 + num(sheet.sk_perception_total_num))
-    end
-
-    _G.__num = num
-    _G.__mod = mod
-    _G.__signed = signed
-    _G.__profBonus = profBonus
-    _G.__clamp = clamp
-  ]]></script>
+    -- fallback leve (se Mob.lua não carregou ainda)
+    sheet.forca = sheet.forca;
+    sheet.destreza = sheet.destreza;
+    sheet.constituicao = sheet.constituicao;
+    sheet.inteligencia = sheet.inteligencia;
+    sheet.sabedoria = sheet.sabedoria;
+    sheet.carisma = sheet.carisma;
+    sheet.cr = sheet.cr;
+  end
+]]></script>
 
   <!-- ✅ SEM CDATA AQUI -->
   <event name="onShow">
@@ -295,40 +128,40 @@
               <!-- ===== CAIXA: IDENTIDADE ===== -->
 <layout align="top" height="160">
   <!-- fundo da caixinha -->
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="10"/>
 
     <layout align="top" height="20">
       <label left="14" top="0" width="200" height="20"
-             text="IDENTIDADE" fontColor="#EDEDED" fontSize="14"/>
+             text="IDENTIDADE" fontColor="#E7D29A" fontSize="14"/>
     </layout>
 
     <layout align="top" height="8"/>
 
     <!-- Linha 1: Nome + Tipo -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="60" height="20" text="Nome" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="60" height="20" text="Nome" fontColor="#D2BE96"/>
       <edit  left="70" top="3" width="360" height="24" field="nome" fontColor="#FFFFFF"/>
 
-      <label left="445" top="6" width="45" height="20" text="Tipo" fontColor="#CCCCCC"/>
+      <label left="445" top="6" width="45" height="20" text="Tipo" fontColor="#D2BE96"/>
       <edit  left="485" top="3" width="250" height="24" field="tipo" fontColor="#FFFFFF"/>
     </layout>
 
     <!-- Linha 2: Tamanho + Alinhamento + CR + PB -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="70" height="20" text="Tamanho" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="70" height="20" text="Tamanho" fontColor="#D2BE96"/>
       <edit  left="80" top="3" width="140" height="24" field="tamanho" fontColor="#FFFFFF"/>
 
-      <label left="230" top="6" width="80" height="20" text="Alinh." fontColor="#CCCCCC"/>
+      <label left="230" top="6" width="80" height="20" text="Alinh." fontColor="#D2BE96"/>
       <edit  left="280" top="3" width="150" height="24" field="alinhamento" fontColor="#FFFFFF"/>
 
-      <label left="440" top="6" width="30" height="20" text="CR" fontColor="#CCCCCC"/>
+      <label left="440" top="6" width="30" height="20" text="CR" fontColor="#D2BE96"/>
       <edit  left="470" top="3" width="60" height="24" field="cr"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="540" top="6" width="30" height="20" text="PB" fontColor="#CCCCCC"/>
+      <label left="540" top="6" width="30" height="20" text="PB" fontColor="#D2BE96"/>
       <edit  left="570" top="3" width="60" height="24" field="prof_bonus"
              horzTextAlign="center" fontColor="#FFFFFF" enabled="false"/>
     </layout>
@@ -341,7 +174,7 @@
               <!-- ===== MOVIMENTAÇÃO + SENTIDOS (LABEL EM CIMA + GRID) ===== -->
               <!-- ===== CAIXA: MOVIMENTAÇÃO ===== -->
 <layout align="top" height="135">
-  <rectangle align="client" color="#000000" opacity="0.22"
+  <rectangle align="client" color="#100C09" opacity="0.45"
              xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
@@ -349,40 +182,40 @@
 
     <layout align="top" height="20">
       <label left="14" top="0" width="220" height="20"
-             text="MOVIMENTAÇÃO" fontColor="#EDEDED" fontSize="14"/>
+             text="MOVIMENTAÇÃO" fontColor="#E7D29A" fontSize="14"/>
     </layout>
 
     <layout align="top" height="10"/>
 
     <!-- Linha 1 -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="45" height="20" text="Walk" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="45" height="20" text="Walk" fontColor="#D2BE96"/>
       <edit  left="58" top="3" width="60" height="24" field="mov_walk"
              horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="120" top="6" width="18" height="20" text="m" fontColor="#888888"/>
+      <label left="120" top="6" width="18" height="20" text="m" fontColor="#8E7A58"/>
 
-      <label left="150" top="6" width="50" height="20" text="Climb" fontColor="#CCCCCC"/>
+      <label left="150" top="6" width="50" height="20" text="Climb" fontColor="#D2BE96"/>
       <edit  left="198" top="3" width="60" height="24" field="mov_climb"
              horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="260" top="6" width="18" height="20" text="m" fontColor="#888888"/>
+      <label left="260" top="6" width="18" height="20" text="m" fontColor="#8E7A58"/>
 
-      <label left="290" top="6" width="35" height="20" text="Fly" fontColor="#CCCCCC"/>
+      <label left="290" top="6" width="35" height="20" text="Fly" fontColor="#D2BE96"/>
       <edit  left="320" top="3" width="60" height="24" field="mov_fly"
              horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="382" top="6" width="18" height="20" text="m" fontColor="#888888"/>
+      <label left="382" top="6" width="18" height="20" text="m" fontColor="#8E7A58"/>
     </layout>
 
     <!-- Linha 2 -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="45" height="20" text="Swim" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="45" height="20" text="Swim" fontColor="#D2BE96"/>
       <edit  left="58" top="3" width="60" height="24" field="mov_swim"
              horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="120" top="6" width="18" height="20" text="m" fontColor="#888888"/>
+      <label left="120" top="6" width="18" height="20" text="m" fontColor="#8E7A58"/>
 
-      <label left="150" top="6" width="55" height="20" text="Burrow" fontColor="#CCCCCC"/>
+      <label left="150" top="6" width="55" height="20" text="Burrow" fontColor="#D2BE96"/>
       <edit  left="205" top="3" width="60" height="24" field="mov_burrow"
              horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="267" top="6" width="18" height="20" text="m" fontColor="#888888"/>
+      <label left="267" top="6" width="18" height="20" text="m" fontColor="#8E7A58"/>
     </layout>
 
   </layout>
@@ -391,7 +224,7 @@
 <layout align="top" height="12"/>
 <!-- ===== CAIXA: SENTIDOS ===== -->
 <layout align="top" height="150">
-  <rectangle align="client" color="#000000" opacity="0.22"
+  <rectangle align="client" color="#100C09" opacity="0.45"
              xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
@@ -399,35 +232,35 @@
 
     <layout align="top" height="20">
       <label left="14" top="0" width="220" height="20"
-             text="SENTIDOS" fontColor="#EDEDED" fontSize="14"/>
+             text="SENTIDOS" fontColor="#E7D29A" fontSize="14"/>
     </layout>
 
     <layout align="top" height="10"/>
 
     <!-- Linha 1 -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="70" text="Blindsight" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="70" text="Blindsight" fontColor="#D2BE96"/>
       <edit  left="80" top="3" width="60" height="24"
              field="sen_blind" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="142" top="6" width="18" text="m" fontColor="#888888"/>
+      <label left="142" top="6" width="18" text="m" fontColor="#8E7A58"/>
 
-      <label left="170" top="6" width="75" text="Darkvision" fontColor="#CCCCCC"/>
+      <label left="170" top="6" width="75" text="Darkvision" fontColor="#D2BE96"/>
       <edit  left="240" top="3" width="60" height="24"
              field="sen_dark" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="302" top="6" width="18" text="m" fontColor="#888888"/>
+      <label left="302" top="6" width="18" text="m" fontColor="#8E7A58"/>
     </layout>
 
     <!-- Linha 2 -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="85" text="Tremorsense" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="85" text="Tremorsense" fontColor="#D2BE96"/>
       <edit  left="95" top="3" width="60" height="24"
              field="sen_tremor" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="157" top="6" width="18" text="m" fontColor="#888888"/>
+      <label left="157" top="6" width="18" text="m" fontColor="#8E7A58"/>
 
-      <label left="185" top="6" width="70" text="Truesight" fontColor="#CCCCCC"/>
+      <label left="185" top="6" width="70" text="Truesight" fontColor="#D2BE96"/>
       <edit  left="250" top="3" width="60" height="24"
              field="sen_true" horzTextAlign="center" fontColor="#FFFFFF"/>
-      <label left="312" top="6" width="18" text="m" fontColor="#888888"/>
+      <label left="312" top="6" width="18" text="m" fontColor="#8E7A58"/>
     </layout>
 
     <layout align="top" height="10"/>
@@ -435,7 +268,7 @@
     <!-- Percepção Passiva -->
     <layout align="top" height="30">
       <label left="14" top="6" width="140"
-             text="Percepção Passiva" fontColor="#CCCCCC"/>
+             text="Percepção Passiva" fontColor="#D2BE96"/>
       <edit  left="150" top="3" width="70" height="24"
              field="percepcao_passiva"
              horzTextAlign="center" fontColor="#FFFFFF"/>
@@ -448,7 +281,7 @@
 
             <!-- ===== CAIXA: DEFESAS ===== -->
 <layout align="top" height="150">
-  <rectangle align="client" color="#000000" opacity="0.22"
+  <rectangle align="client" color="#100C09" opacity="0.45"
              xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
@@ -456,22 +289,22 @@
 
     <layout align="top" height="20">
       <label left="14" top="0" width="200" height="20"
-             text="DEFESAS" fontColor="#EDEDED" fontSize="14"/>
+             text="DEFESAS" fontColor="#E7D29A" fontSize="14"/>
     </layout>
 
     <layout align="top" height="12"/>
 
     <!-- Linha principal -->
     <layout align="top" height="30">
-      <label left="14" top="6" width="30" text="CA" fontColor="#CCCCCC"/>
+      <label left="14" top="6" width="30" text="CA" fontColor="#D2BE96"/>
       <edit  left="45" top="3" width="60" height="24"
              field="ca" horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="130" top="6" width="70" text="HP Atual" fontColor="#CCCCCC"/>
+      <label left="130" top="6" width="70" text="HP Atual" fontColor="#D2BE96"/>
       <edit  left="200" top="3" width="90" height="24"
              field="hp_atual" horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="310" top="6" width="70" text="HP Máx" fontColor="#CCCCCC"/>
+      <label left="310" top="6" width="70" text="HP Máx" fontColor="#D2BE96"/>
       <edit  left="380" top="3" width="90" height="24"
              field="hp_max" horzTextAlign="center" fontColor="#FFFFFF"/>
     </layout>
@@ -481,7 +314,7 @@
    <!-- Barra de Vida -->
 <layout align="top" height="45">
   <label left="14" top="0" width="200" height="18"
-         text="Barra de Vida" fontColor="#CCCCCC"/>
+         text="Barra de Vida" fontColor="#D2BE96"/>
 
   <progressBar left="14" top="20" width="520" height="18"
                field="hp_atual"
@@ -496,14 +329,14 @@
 <layout align="top" height="12"/>
 
 <layout align="top" height="26">
-  <label align="client" text="ATRIBUTOS / SAVES / SKILLS" fontColor="#EDEDED" fontSize="14"/>
+  <label align="client" text="ATRIBUTOS / SAVES / SKILLS" fontColor="#E7D29A" fontSize="14"/>
 </layout>
 
 <layout align="top" height="10"/>
 
 <!-- ===================== FORÇA ===================== -->
 <layout align="top" height="110">
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="8"/>
@@ -517,11 +350,11 @@
         ]]></event>
       </button>
 
-      <label left="135" top="6" width="30" text="Val" fontColor="#999999"/>
+      <label left="135" top="6" width="30" text="Val" fontColor="#A58E64"/>
       <edit  left="165" top="2" width="55" height="24" field="forca" type="number"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="225" top="6" width="30" text="Mod" fontColor="#999999"/>
+      <label left="225" top="6" width="30" text="Mod" fontColor="#A58E64"/>
       <edit  left="255" top="2" width="55" height="24" field="mod_forca"
              readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
 
@@ -564,7 +397,7 @@
 
 <!-- ===================== DESTREZA ===================== -->
 <layout align="top" height="165">
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="8"/>
@@ -578,11 +411,11 @@
         ]]></event>
       </button>
 
-      <label left="155" top="6" width="30" text="Val" fontColor="#999999"/>
+      <label left="155" top="6" width="30" text="Val" fontColor="#A58E64"/>
       <edit  left="185" top="2" width="55" height="24" field="destreza" type="number"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="245" top="6" width="30" text="Mod" fontColor="#999999"/>
+      <label left="245" top="6" width="30" text="Mod" fontColor="#A58E64"/>
       <edit  left="275" top="2" width="55" height="24" field="mod_destreza"
              readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
 
@@ -670,7 +503,7 @@
 
 <!-- ===================== CONSTITUIÇÃO ===================== -->
 <layout align="top" height="95">
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="8"/>
@@ -684,11 +517,11 @@
         ]]></event>
       </button>
 
-      <label left="185" top="6" width="30" text="Val" fontColor="#999999"/>
+      <label left="185" top="6" width="30" text="Val" fontColor="#A58E64"/>
       <edit  left="215" top="2" width="55" height="24" field="constituicao" type="number"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="275" top="6" width="30" text="Mod" fontColor="#999999"/>
+      <label left="275" top="6" width="30" text="Mod" fontColor="#A58E64"/>
       <edit  left="305" top="2" width="55" height="24" field="mod_constituicao"
              readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
 
@@ -715,7 +548,7 @@
 
 <!-- ===================== INTELIGÊNCIA ===================== -->
 <layout align="top" height="185">
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="8"/>
@@ -728,11 +561,11 @@
         ]]></event>
       </button>
 
-      <label left="185" top="6" width="30" text="Val" fontColor="#999999"/>
+      <label left="185" top="6" width="30" text="Val" fontColor="#A58E64"/>
       <edit  left="215" top="2" width="55" height="24" field="inteligencia" type="number"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="275" top="6" width="30" text="Mod" fontColor="#999999"/>
+      <label left="275" top="6" width="30" text="Mod" fontColor="#A58E64"/>
       <edit  left="305" top="2" width="55" height="24" field="mod_inteligencia"
              readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
 
@@ -827,7 +660,7 @@
 
 <!-- ===================== SABEDORIA ===================== -->
 <layout align="top" height="210">
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="8"/>
@@ -840,11 +673,11 @@
         ]]></event>
       </button>
 
-      <label left="185" top="6" width="30" text="Val" fontColor="#999999"/>
+      <label left="185" top="6" width="30" text="Val" fontColor="#A58E64"/>
       <edit  left="215" top="2" width="55" height="24" field="sabedoria" type="number"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="275" top="6" width="30" text="Mod" fontColor="#999999"/>
+      <label left="275" top="6" width="30" text="Mod" fontColor="#A58E64"/>
       <edit  left="305" top="2" width="55" height="24" field="mod_sabedoria"
              readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
 
@@ -939,7 +772,7 @@
 
 <!-- ===================== CARISMA ===================== -->
 <layout align="top" height="185">
-  <rectangle align="client" color="#000000" opacity="0.22" xradius="10" yradius="10" enabled="false"/>
+  <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
     <layout align="top" height="8"/>
@@ -952,11 +785,11 @@
         ]]></event>
       </button>
 
-      <label left="185" top="6" width="30" text="Val" fontColor="#999999"/>
+      <label left="185" top="6" width="30" text="Val" fontColor="#A58E64"/>
       <edit  left="215" top="2" width="55" height="24" field="carisma" type="number"
              horzTextAlign="center" fontColor="#FFFFFF"/>
 
-      <label left="275" top="6" width="30" text="Mod" fontColor="#999999"/>
+      <label left="275" top="6" width="30" text="Mod" fontColor="#A58E64"/>
       <edit  left="305" top="2" width="55" height="24" field="mod_carisma"
              readOnly="true" horzTextAlign="center" fontColor="#FFFFFF"/>
 
@@ -1164,43 +997,66 @@
    <!-- ===================== ABA TRAITS/EXTRAS (EMBUTIDA; SEM <frame>) ===================== -->
     <tab text="Traits / Extras">
       <scrollBox align="client">
-        <layout align="top" height="1700">
-          <image align="client" src="bg.png" style="autoFit"/>
-          <image align="client" src="panel.png" style="autoFit"/>
+        <layout align="top" height="1850">
+          <image align="client" src="images/bg.png" style="autoFit"/>
+          <image align="client" src="images/panel.png" style="autoFit"/>
 
           <layout align="client">
-            <layout align="top" height="40">
-              <label align="client" text="TRAITS / EXTRAS" fontColor="#EDEDED" fontSize="16"/>
+            <layout align="top" height="44">
+              <rectangle left="0" top="40" width="9999" height="1" color="#6F5730" opacity="0.55" enabled="false"/>
+              <label align="client" text="TRAITS / EXTRAS" fontColor="#E7D29A" fontSize="16"/>
             </layout>
 
             <layout align="top" height="10"/>
 
-            <layout align="top" height="28">
-              <label align="client" text="Traits" fontColor="#FFFFFF" fontSize="14"/>
+            <layout align="top" height="360">
+              <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
+              <layout align="client">
+                <layout align="top" height="10"/>
+                <layout align="top" height="24">
+                  <label left="12" top="2" width="300" text="TRAITS" fontColor="#E7D29A" fontSize="14"/>
+                </layout>
+                <layout align="top" height="2"><rectangle left="12" top="0" width="320" height="1" color="#6F5730" opacity="0.60" enabled="false"/></layout>
+                <layout align="top" height="6"/>
+                <layout align="client">
+                  <textEditor align="client" field="traits_texto" fontColor="#FFFFFF"/>
+                </layout>
+                <layout align="top" height="10"/>
+              </layout>
             </layout>
+
+            <layout align="top" height="16"/>
 
             <layout align="top" height="300">
-              <textEditor align="client" field="traits_texto" fontColor="#FFFFFF"/>
+              <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
+              <layout align="client">
+                <layout align="top" height="10"/>
+                <layout align="top" height="24">
+                  <label left="12" top="2" width="500" text="RESISTÊNCIAS / IMUNIDADES / VULNERABILIDADES" fontColor="#E7D29A" fontSize="13"/>
+                </layout>
+                <layout align="top" height="6"/>
+                <layout align="client">
+                  <textEditor align="client" field="resist_imune_texto" fontColor="#FFFFFF"/>
+                </layout>
+                <layout align="top" height="10"/>
+              </layout>
             </layout>
 
             <layout align="top" height="16"/>
 
-            <layout align="top" height="28">
-              <label align="client" text="Resistências / Imunidades / Vulnerabilidades" fontColor="#FFFFFF" fontSize="14"/>
-            </layout>
-
-            <layout align="top" height="240">
-              <textEditor align="client" field="resist_imune_texto" fontColor="#FFFFFF"/>
-            </layout>
-
-            <layout align="top" height="16"/>
-
-            <layout align="top" height="28">
-              <label align="client" text="Idiomas / Observações" fontColor="#FFFFFF" fontSize="14"/>
-            </layout>
-
-            <layout align="top" height="240">
-              <textEditor align="client" field="idiomas_obs_texto" fontColor="#FFFFFF"/>
+            <layout align="top" height="300">
+              <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
+              <layout align="client">
+                <layout align="top" height="10"/>
+                <layout align="top" height="24">
+                  <label left="12" top="2" width="350" text="IDIOMAS / OBSERVAÇÕES" fontColor="#E7D29A" fontSize="13"/>
+                </layout>
+                <layout align="top" height="6"/>
+                <layout align="client">
+                  <textEditor align="client" field="idiomas_obs_texto" fontColor="#FFFFFF"/>
+                </layout>
+                <layout align="top" height="10"/>
+              </layout>
             </layout>
           </layout>
         </layout>
@@ -1209,29 +1065,34 @@
     <!-- ===================== ABA Ações (EMBUTIDA; SEM <frame>) ===================== -->
 <tab text="Ações">
   <scrollBox align="client">
-    <layout align="client">
+    <layout align="top" height="1100">
+      <image align="client" src="images/bg.png" style="autoFit"/>
+      <image align="client" src="images/panel.png" style="autoFit"/>
 
-      <!-- Título -->
-      <layout align="top" height="40">
-        <label align="client" text="AÇÕES" fontColor="#EDEDED" fontSize="16"/>
-      </layout>
+      <layout align="client">
 
-      <layout align="top" height="10"/>
+        <layout align="top" height="40">
+          <label align="client" text="AÇÕES" fontColor="#E7D29A" fontSize="16"/>
+        </layout>
 
-      <!-- =========================
-           CAIXA DE ATAQUES
-           ========================= -->
-      <layout align="top" height="320">
-        <!-- Fundo da caixa -->
-        <rectangle align="client" color="#000000" opacity="0.18" xradius="8" yradius="8" enabled="false"/>
+        <layout align="top" height="10"/>
 
-        <!-- Conteúdo interno com padding "manual" -->
-        <layout align="client">
-          <layout align="top" height="10"/>
+        <layout align="top" height="340">
+          <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
-          <layout align="top" height="45">
-            <button left="10" top="0" width="220" height="35" text="Adicionar Ataque">
-              <event name="onClick"><![CDATA[
+          <layout align="client">
+            <layout align="top" height="10"/>
+
+            <layout align="top" height="24">
+              <label left="12" top="2" width="250" text="ATAQUES" fontColor="#E7D29A" fontSize="14"/>
+            </layout>
+            <layout align="top" height="2"><rectangle left="12" top="0" width="260" height="1" color="#6F5730" opacity="0.60" enabled="false"/></layout>
+
+            <layout align="top" height="8"/>
+
+            <layout align="top" height="45">
+              <button left="10" top="0" width="220" height="35" text="Novo Ataque">
+                <event name="onClick"><![CDATA[
   local form = self;
   for i = 1, 20 do
     if form == nil then break; end
@@ -1258,32 +1119,30 @@
     showMessage("Não consegui adicionar item na lista (append retornou nil).");
   end
 ]]></event>
-            </button>
-          </layout>
+              </button>
+            </layout>
 
-          <layout align="top" height="8"/>
+            <layout align="top" height="8"/>
 
-          <!-- Cabeçalho -->
-          <layout align="top" height="22">
-            <label left="10" top="0" width="220" height="22" text="Nome" fontColor="#CCCCCC"/>
-            <label left="240" top="0" width="70"  height="22" text="To Hit" fontColor="#CCCCCC"/>
-            <label left="320" top="0" width="160" height="22" text="Dano" fontColor="#CCCCCC"/>
-            <label left="490" top="0" width="120" height="22" text="Tipo" fontColor="#CCCCCC"/>
-          </layout>
+            <layout align="top" height="22">
+              <label left="10" top="0" width="220" height="22" text="Nome" fontColor="#D2BE96"/>
+              <label left="240" top="0" width="70"  height="22" text="To Hit" fontColor="#D2BE96"/>
+              <label left="320" top="0" width="160" height="22" text="Dano" fontColor="#D2BE96"/>
+              <label left="490" top="0" width="120" height="22" text="Tipo" fontColor="#D2BE96"/>
+            </layout>
 
-          <!-- Lista de ataques (ela cresce internamente; o scrollBox rola a página inteira) -->
-          <recordList name="rclAttacks" field="attacks" align="client" layout="vertical">
-            <layout height="92" width="9999">
-              <rectangle align="client" color="#000000" opacity="0.22" xradius="6" yradius="6" enabled="false"/>
+            <recordList name="rclAttacks" field="attacks" align="client" layout="vertical">
+              <layout height="92" width="9999">
+                <rectangle align="client" color="#0F0C0A" opacity="0.42" xradius="6" yradius="6" enabled="false"/>
 
-              <layout align="top" height="34">
-                <edit  left="10"  top="6" width="220" height="24" field="name" fontColor="#FFFFFF"/>
-                <edit  left="240" top="6" width="70"  height="24" field="toHit" horzTextAlign="center" fontColor="#FFFFFF"/>
-                <edit  left="320" top="6" width="160" height="24" field="damage" fontColor="#FFFFFF"/>
-                <edit  left="490" top="6" width="120" height="24" field="dmgType" fontColor="#FFFFFF"/>
+                <layout align="top" height="34">
+                  <edit  left="10"  top="6" width="220" height="24" field="name" fontColor="#FFFFFF"/>
+                  <edit  left="240" top="6" width="70"  height="24" field="toHit" horzTextAlign="center" fontColor="#FFFFFF"/>
+                  <edit  left="320" top="6" width="160" height="24" field="damage" fontColor="#FFFFFF"/>
+                  <edit  left="490" top="6" width="120" height="24" field="dmgType" fontColor="#FFFFFF"/>
 
-                <button left="620" top="6" width="90" height="24" text="ROLAR">
-           <event name="onClick"><![CDATA[
+                  <button left="620" top="6" width="90" height="24" text="Rolar">
+                    <event name="onClick"><![CDATA[
   local n = self:getNodeObject();
   if n == nil then
     showMessage("Nenhum ataque selecionado.");
@@ -1291,41 +1150,46 @@
   end
   rollAttack(n, n);
 ]]></event>
-                </button>
+                  </button>
 
-                <button left="720" top="6" width="90" height="24" text="Excluir">
-                <event name="onClick"><![CDATA[
+                  <button left="720" top="6" width="90" height="24" text="Apagar">
+                    <event name="onClick"><![CDATA[
   local n = self:getNodeObject();
   if n ~= nil then deleteAttack(n); end
 ]]></event>
-                </button>
-              </layout>
+                  </button>
+                </layout>
 
-              <layout align="top" height="34">
-                <label left="10" top="6" width="60" height="24" text="Notas:" fontColor="#CCCCCC"/>
-                <edit  left="70" top="6" width="740" height="24" field="notes" fontColor="#FFFFFF"/>
+                <layout align="top" height="34">
+                  <label left="10" top="6" width="60" height="24" text="Notas:" fontColor="#D2BE96"/>
+                  <edit  left="70" top="6" width="740" height="24" field="notes" fontColor="#FFFFFF"/>
+                </layout>
               </layout>
-            </layout>
-          </recordList>
-
+            </recordList>
+          </layout>
         </layout>
+
+        <layout align="top" height="20"/>
+
+        <layout align="top" height="330">
+          <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
+
+          <layout align="client">
+            <layout align="top" height="10"/>
+            <layout align="top" height="24">
+              <label left="12" top="2" width="260" text="AÇÕES LENDÁRIAS" fontColor="#E7D29A" fontSize="14"/>
+            </layout>
+            <layout align="top" height="6"/>
+            <layout align="client">
+              <textEditor align="client" field="acoes_lendarias_texto" fontColor="#FFFFFF"/>
+            </layout>
+            <layout align="top" height="10"/>
+          </layout>
+        </layout>
+
+        <layout align="top" height="20"/>
+
       </layout>
-
-      <layout align="top" height="20"/>
-
-      <!-- =========================
-           AÇÕES LENDÁRIAS (mais embaixo)
-           ========================= -->
-      <layout align="top" height="28">
-        <label align="client" text="Ações Lendárias" fontColor="#FFFFFF" fontSize="14"/>
-      </layout>
-
-      <layout align="top" height="260">
-        <textEditor align="client" field="acoes_lendarias_texto" fontColor="#FFFFFF"/>
-      </layout>
-
-      <layout align="top" height="20"/>
-
     </layout>
   </scrollBox>
 </tab>

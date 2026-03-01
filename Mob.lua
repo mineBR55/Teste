@@ -380,12 +380,4 @@ function rollAttack(anyNode, attackNode)
     );
 end
 
-_G.__num = num;
-_G.__mod = mod;
-_G.__signed = signed;
-_G.__clamp = clamp;
-_G.recalcAll = recalcAll;
-_G.rollBonus = rollBonus;
-_G.rollExpr = rollExpr;
-_G.rollAttack = rollAttack;
-_G.deleteAttack = deleteAttack;
+-- funções globais já são expostas automaticamente pelo require do Firecast
