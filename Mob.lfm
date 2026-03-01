@@ -97,14 +97,173 @@
     function recalcAll()
       if sheet == nil then return end
 
-      -- “cutuca” campos pra forçar refresh
-      sheet.forca = sheet.forca
-      sheet.destreza = sheet.destreza
-      sheet.constituicao = sheet.constituicao
-      sheet.inteligencia = sheet.inteligencia
-      sheet.sabedoria = sheet.sabedoria
-      sheet.carisma = sheet.carisma
-      sheet.cr = sheet.cr
+      local function parseCR(v)
+        local s = tostring(v or ""):gsub("%s+", "")
+        if s == "" then return 0 end
+        local a, b = s:match("^(%d+)%/(%d+)$")
+        if a and b then
+          local na, nb = tonumber(a), tonumber(b)
+          if na and nb and nb ~= 0 then return na / nb end
+        end
+        return tonumber(s) or 0
+      end
+
+      local function pbFromCR(cr)
+        if cr >= 29 then return 9 end
+        if cr >= 25 then return 8 end
+        if cr >= 21 then return 7 end
+        if cr >= 17 then return 6 end
+        if cr >= 13 then return 5 end
+        if cr >= 9  then return 4 end
+        if cr >= 5  then return 3 end
+        return 2
+      end
+
+      local function fmtBonus(n)
+        n = num(n)
+        if n >= 0 then return "+" .. tostring(n) end
+        return tostring(n)
+      end
+
+      local function forceProfIfExp(profField, expField)
+        if isChecked(sheet[expField]) and not isChecked(sheet[profField]) then
+          sheet[profField] = true
+        end
+      end
+
+      local function calcTotal(baseModNum, profField, expField, miscField)
+        local pb = num(sheet.prof_bonus_num)
+        local misc = num(sheet[miscField])
+        local add = 0
+        if isChecked(sheet[profField]) then add = add + pb end
+        if isChecked(sheet[expField])  then add = add + pb end
+        return num(baseModNum) + misc + add
+      end
+
+      local crVal = parseCR(sheet.cr)
+      local pb = pbFromCR(crVal)
+      sheet.prof_bonus_num = pb
+      sheet.prof_bonus = fmtBonus(pb)
+
+      sheet.mod_forca_num = mod(sheet.forca)
+      sheet.mod_forca = fmtBonus(sheet.mod_forca_num)
+
+      sheet.mod_destreza_num = mod(sheet.destreza)
+      sheet.mod_destreza = fmtBonus(sheet.mod_destreza_num)
+
+      sheet.mod_constituicao_num = mod(sheet.constituicao)
+      sheet.mod_constituicao = fmtBonus(sheet.mod_constituicao_num)
+
+      sheet.mod_inteligencia_num = mod(sheet.inteligencia)
+      sheet.mod_inteligencia = fmtBonus(sheet.mod_inteligencia_num)
+
+      sheet.mod_sabedoria_num = mod(sheet.sabedoria)
+      sheet.mod_sabedoria = fmtBonus(sheet.mod_sabedoria_num)
+
+      sheet.mod_carisma_num = mod(sheet.carisma)
+      sheet.mod_carisma = fmtBonus(sheet.mod_carisma_num)
+
+      forceProfIfExp("sv_str_prof", "sv_str_exp")
+      sheet.sv_str_total_num = calcTotal(sheet.mod_forca_num, "sv_str_prof", "sv_str_exp", "sv_str_misc")
+      sheet.sv_str_total = fmtBonus(sheet.sv_str_total_num)
+
+      forceProfIfExp("sv_dex_prof", "sv_dex_exp")
+      sheet.sv_dex_total_num = calcTotal(sheet.mod_destreza_num, "sv_dex_prof", "sv_dex_exp", "sv_dex_misc")
+      sheet.sv_dex_total = fmtBonus(sheet.sv_dex_total_num)
+
+      forceProfIfExp("sv_con_prof", "sv_con_exp")
+      sheet.sv_con_total_num = calcTotal(sheet.mod_constituicao_num, "sv_con_prof", "sv_con_exp", "sv_con_misc")
+      sheet.sv_con_total = fmtBonus(sheet.sv_con_total_num)
+
+      forceProfIfExp("sv_int_prof", "sv_int_exp")
+      sheet.sv_int_total_num = calcTotal(sheet.mod_inteligencia_num, "sv_int_prof", "sv_int_exp", "sv_int_misc")
+      sheet.sv_int_total = fmtBonus(sheet.sv_int_total_num)
+
+      forceProfIfExp("sv_wis_prof", "sv_wis_exp")
+      sheet.sv_wis_total_num = calcTotal(sheet.mod_sabedoria_num, "sv_wis_prof", "sv_wis_exp", "sv_wis_misc")
+      sheet.sv_wis_total = fmtBonus(sheet.sv_wis_total_num)
+
+      forceProfIfExp("sv_cha_prof", "sv_cha_exp")
+      sheet.sv_cha_total_num = calcTotal(sheet.mod_carisma_num, "sv_cha_prof", "sv_cha_exp", "sv_cha_misc")
+      sheet.sv_cha_total = fmtBonus(sheet.sv_cha_total_num)
+
+      forceProfIfExp("sk_initiative_prof", "sk_initiative_exp")
+      sheet.sk_initiative_total_num = calcTotal(sheet.mod_destreza_num, "sk_initiative_prof", "sk_initiative_exp", "sk_initiative_misc")
+      sheet.sk_initiative_total = fmtBonus(sheet.sk_initiative_total_num)
+
+      forceProfIfExp("sk_athletics_prof", "sk_athletics_exp")
+      sheet.sk_athletics_total_num = calcTotal(sheet.mod_forca_num, "sk_athletics_prof", "sk_athletics_exp", "sk_athletics_misc")
+      sheet.sk_athletics_total = fmtBonus(sheet.sk_athletics_total_num)
+
+      forceProfIfExp("sk_acrobatics_prof", "sk_acrobatics_exp")
+      sheet.sk_acrobatics_total_num = calcTotal(sheet.mod_destreza_num, "sk_acrobatics_prof", "sk_acrobatics_exp", "sk_acrobatics_misc")
+      sheet.sk_acrobatics_total = fmtBonus(sheet.sk_acrobatics_total_num)
+
+      forceProfIfExp("sk_sleight_prof", "sk_sleight_exp")
+      sheet.sk_sleight_total_num = calcTotal(sheet.mod_destreza_num, "sk_sleight_prof", "sk_sleight_exp", "sk_sleight_misc")
+      sheet.sk_sleight_total = fmtBonus(sheet.sk_sleight_total_num)
+
+      forceProfIfExp("sk_stealth_prof", "sk_stealth_exp")
+      sheet.sk_stealth_total_num = calcTotal(sheet.mod_destreza_num, "sk_stealth_prof", "sk_stealth_exp", "sk_stealth_misc")
+      sheet.sk_stealth_total = fmtBonus(sheet.sk_stealth_total_num)
+
+      forceProfIfExp("sk_arcana_prof", "sk_arcana_exp")
+      sheet.sk_arcana_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_arcana_prof", "sk_arcana_exp", "sk_arcana_misc")
+      sheet.sk_arcana_total = fmtBonus(sheet.sk_arcana_total_num)
+
+      forceProfIfExp("sk_history_prof", "sk_history_exp")
+      sheet.sk_history_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_history_prof", "sk_history_exp", "sk_history_misc")
+      sheet.sk_history_total = fmtBonus(sheet.sk_history_total_num)
+
+      forceProfIfExp("sk_investigation_prof", "sk_investigation_exp")
+      sheet.sk_investigation_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_investigation_prof", "sk_investigation_exp", "sk_investigation_misc")
+      sheet.sk_investigation_total = fmtBonus(sheet.sk_investigation_total_num)
+
+      forceProfIfExp("sk_nature_prof", "sk_nature_exp")
+      sheet.sk_nature_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_nature_prof", "sk_nature_exp", "sk_nature_misc")
+      sheet.sk_nature_total = fmtBonus(sheet.sk_nature_total_num)
+
+      forceProfIfExp("sk_religion_prof", "sk_religion_exp")
+      sheet.sk_religion_total_num = calcTotal(sheet.mod_inteligencia_num, "sk_religion_prof", "sk_religion_exp", "sk_religion_misc")
+      sheet.sk_religion_total = fmtBonus(sheet.sk_religion_total_num)
+
+      forceProfIfExp("sk_animal_prof", "sk_animal_exp")
+      sheet.sk_animal_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_animal_prof", "sk_animal_exp", "sk_animal_misc")
+      sheet.sk_animal_total = fmtBonus(sheet.sk_animal_total_num)
+
+      forceProfIfExp("sk_insight_prof", "sk_insight_exp")
+      sheet.sk_insight_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_insight_prof", "sk_insight_exp", "sk_insight_misc")
+      sheet.sk_insight_total = fmtBonus(sheet.sk_insight_total_num)
+
+      forceProfIfExp("sk_medicine_prof", "sk_medicine_exp")
+      sheet.sk_medicine_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_medicine_prof", "sk_medicine_exp", "sk_medicine_misc")
+      sheet.sk_medicine_total = fmtBonus(sheet.sk_medicine_total_num)
+
+      forceProfIfExp("sk_perception_prof", "sk_perception_exp")
+      sheet.sk_perception_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_perception_prof", "sk_perception_exp", "sk_perception_misc")
+      sheet.sk_perception_total = fmtBonus(sheet.sk_perception_total_num)
+
+      forceProfIfExp("sk_survival_prof", "sk_survival_exp")
+      sheet.sk_survival_total_num = calcTotal(sheet.mod_sabedoria_num, "sk_survival_prof", "sk_survival_exp", "sk_survival_misc")
+      sheet.sk_survival_total = fmtBonus(sheet.sk_survival_total_num)
+
+      forceProfIfExp("sk_deception_prof", "sk_deception_exp")
+      sheet.sk_deception_total_num = calcTotal(sheet.mod_carisma_num, "sk_deception_prof", "sk_deception_exp", "sk_deception_misc")
+      sheet.sk_deception_total = fmtBonus(sheet.sk_deception_total_num)
+
+      forceProfIfExp("sk_intimidation_prof", "sk_intimidation_exp")
+      sheet.sk_intimidation_total_num = calcTotal(sheet.mod_carisma_num, "sk_intimidation_prof", "sk_intimidation_exp", "sk_intimidation_misc")
+      sheet.sk_intimidation_total = fmtBonus(sheet.sk_intimidation_total_num)
+
+      forceProfIfExp("sk_performance_prof", "sk_performance_exp")
+      sheet.sk_performance_total_num = calcTotal(sheet.mod_carisma_num, "sk_performance_prof", "sk_performance_exp", "sk_performance_misc")
+      sheet.sk_performance_total = fmtBonus(sheet.sk_performance_total_num)
+
+      forceProfIfExp("sk_persuasion_prof", "sk_persuasion_exp")
+      sheet.sk_persuasion_total_num = calcTotal(sheet.mod_carisma_num, "sk_persuasion_prof", "sk_persuasion_exp", "sk_persuasion_misc")
+      sheet.sk_persuasion_total = fmtBonus(sheet.sk_persuasion_total_num)
+
+      sheet.percepcao_passiva = tostring(10 + num(sheet.sk_perception_total_num))
     end
 
     _G.__num = num
@@ -1002,11 +1161,6 @@
         </layout>
       </scrollBox>
     </tab>
-<dataLink field="nome">
-  <event name="onChange"><![CDATA[
-    setCurrentSheet(sheet);
-  ]]></event>
-</dataLink>
    <!-- ===================== ABA TRAITS/EXTRAS (EMBUTIDA; SEM <frame>) ===================== -->
     <tab text="Traits / Extras">
       <scrollBox align="client">
