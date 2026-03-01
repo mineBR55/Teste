@@ -1223,7 +1223,7 @@
            ========================= -->
       <layout align="top" height="320">
         <!-- Fundo da caixa -->
-        <rectangle align="client" color="#000000" opacity="0.18" xradius="8" yradius="8"/>
+        <rectangle align="client" color="#000000" opacity="0.18" xradius="8" yradius="8" enabled="false"/>
 
         <!-- Conteúdo interno com padding "manual" -->
         <layout align="client">
@@ -1232,7 +1232,22 @@
           <layout align="top" height="45">
             <button left="10" top="0" width="220" height="35" text="Adicionar Ataque">
               <event name="onClick"><![CDATA[
-  local n = self.rclAttacks:append();
+  local form = self;
+  for i = 1, 20 do
+    if form == nil then break; end
+    if form.rclAttacks ~= nil then break; end
+    form = form.parent;
+  end;
+
+  local lista = nil;
+  if form ~= nil then lista = form.rclAttacks; end
+
+  if lista == nil then
+    showMessage("Não consegui localizar a lista de ataques (rclAttacks).");
+    return;
+  end
+
+  local n = lista:append();
   if n ~= nil then
     n.name = n.name or "Ataque";
     n.toHit = n.toHit or "0";
@@ -1259,7 +1274,7 @@
           <!-- Lista de ataques (ela cresce internamente; o scrollBox rola a página inteira) -->
           <recordList name="rclAttacks" field="attacks" align="client" layout="vertical">
             <layout height="92" width="9999">
-              <rectangle align="client" color="#000000" opacity="0.22" xradius="6" yradius="6"/>
+              <rectangle align="client" color="#000000" opacity="0.22" xradius="6" yradius="6" enabled="false"/>
 
               <layout align="top" height="34">
                 <edit  left="10"  top="6" width="220" height="24" field="name" fontColor="#FFFFFF"/>
@@ -1270,13 +1285,18 @@
                 <button left="620" top="6" width="90" height="24" text="ROLAR">
            <event name="onClick"><![CDATA[
   local n = self:getNodeObject();
+  if n == nil then
+    showMessage("Nenhum ataque selecionado.");
+    return;
+  end
   rollAttack(n, n);
 ]]></event>
                 </button>
 
                 <button left="720" top="6" width="90" height="24" text="Excluir">
                 <event name="onClick"><![CDATA[
-  deleteAttack(self:getNodeObject());
+  local n = self:getNodeObject();
+  if n ~= nil then deleteAttack(n); end
 ]]></event>
                 </button>
               </layout>
