@@ -111,6 +111,37 @@
     if recalcAll ~= nil then recalcAll(); end
   </event>
 
+  
+  <!-- XML frames disponíveis (usar em propriedades de frame/skin quando aplicável):
+       frames/atributeFrame/frame.xml
+       frames/atributeFrame2/frame.xml
+       frames/banner/frame.xml
+       frames/panel1/frame.xml
+       frames/panel2/frame.xml
+       frames/panel3transp/frame.xml
+       frames/panel4transp/frame.xml
+       frames/panel5/frame.xml
+       frames/panel6/panel6.xml
+       frames/posCaptionEdit1/frame.xml
+       frames/posCaptionEdit2/frame.xml
+       frames/shield/frame.xml
+       frames/upperInfoGrid/frame.xml
+  -->
+
+  <!-- v10:
+       frameStyle XML comprovadamente funciona em flowPart (como DnD5e usa templates/flowPart).
+       Por isso os headers mudaram.
+       Os blocos restantes foram reforçados com PNGs reais confirmados.
+       Próximo passo ideal: converter cada bloco de atributo/caixa para containers compatíveis com frameStyle + frameRegion.
+  -->
+  <!-- v9: Teste de frameStyle XML (DnD5e-like)
+       Headers usam:
+         frames/magicHeader/header0.xml
+         frames/magicHeader/header1.xml
+       Teste atributo FORÇA:
+         frames/atributeFrame/frame.xml
+       Se algum componente não aceitar frameStyle, remova apenas esse atributo da tag.
+  -->
   <tabControl align="client">
 
     <!-- ===================== ABA FRENTE ===================== -->
@@ -131,12 +162,14 @@
   <rectangle align="client" color="#100C09" opacity="0.45" xradius="10" yradius="10" enabled="false"/>
 
   <layout align="client">
-    <layout align="top" height="10"/>
+    <image align="top" height="52" src="frames/upperInfoGrid/completImage.png" style="autoFit" enabled="false"/>
+<layout align="top" height="10"/>
 
-    <layout align="top" height="20">
-      <label left="14" top="0" width="200" height="20"
-             text="IDENTIDADE" fontColor="#E7D29A" fontSize="14"/>
-    </layout>
+    <flowLayout align="top" autoHeight="true" maxControlsPerLine="1">
+  <flowPart minWidth="200" maxWidth="9999" height="28" frameStyle="frames/magicHeader/header0.xml">
+    <label align="left" width="260" frameRegion="RegiaoConteudo" text="IDENTIDADE" fontColor="#D4B26A"/>
+  </flowPart>
+</flowLayout>
 
     <layout align="top" height="8"/>
 
@@ -180,10 +213,11 @@
   <layout align="client">
     <layout align="top" height="10"/>
 
-    <layout align="top" height="20">
-      <label left="14" top="0" width="220" height="20"
-             text="MOVIMENTAÇÃO" fontColor="#E7D29A" fontSize="14"/>
-    </layout>
+    <flowLayout align="top" autoHeight="true" maxControlsPerLine="1">
+  <flowPart minWidth="200" maxWidth="9999" height="28" frameStyle="frames/magicHeader/header0.xml">
+    <label align="left" width="260" frameRegion="RegiaoConteudo" text="MOVIMENTAÇÃO" fontColor="#D4B26A"/>
+  </flowPart>
+</flowLayout>
 
     <layout align="top" height="10"/>
 
@@ -230,10 +264,11 @@
   <layout align="client">
     <layout align="top" height="10"/>
 
-    <layout align="top" height="20">
-      <label left="14" top="0" width="220" height="20"
-             text="SENTIDOS" fontColor="#E7D29A" fontSize="14"/>
-    </layout>
+    <flowLayout align="top" autoHeight="true" maxControlsPerLine="1">
+  <flowPart minWidth="200" maxWidth="9999" height="28" frameStyle="frames/magicHeader/header0.xml">
+    <label align="left" width="260" frameRegion="RegiaoConteudo" text="SENTIDOS" fontColor="#D4B26A"/>
+  </flowPart>
+</flowLayout>
 
     <layout align="top" height="10"/>
 
@@ -287,10 +322,11 @@
   <layout align="client">
     <layout align="top" height="10"/>
 
-    <layout align="top" height="20">
-      <label left="14" top="0" width="200" height="20"
-             text="DEFESAS" fontColor="#E7D29A" fontSize="14"/>
-    </layout>
+    <flowLayout align="top" autoHeight="true" maxControlsPerLine="1">
+  <flowPart minWidth="200" maxWidth="9999" height="28" frameStyle="frames/magicHeader/header0.xml">
+    <label align="left" width="260" frameRegion="RegiaoConteudo" text="DEFESAS" fontColor="#D4B26A"/>
+  </flowPart>
+</flowLayout>
 
     <layout align="top" height="12"/>
 
